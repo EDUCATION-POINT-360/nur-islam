@@ -9,106 +9,116 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --emerald: #10b981; --primary: #059669; }
-        body { background: #f8fafc; color: #1e293b; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; }
+        body { background: #f8fafc; color: #1e293b; overflow-x: hidden; height: 100vh; display: flex; flex-direction: column; }
         .font-urdu { font-family: 'Noto Nastaliq Urdu', serif; line-height: 2.5; }
-        .font-arabic { font-family: 'Amiri', serif; line-height: 1.8; font-size: 1.8rem; }
-        .custom-scroll { overflow-y: auto; }
+        .font-arabic { font-family: 'Amiri', serif; line-height: 1.8; font-size: 1.8rem; color: #0f172a; }
+        .custom-scroll { overflow-y: auto; scroll-behavior: smooth; }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #10b98133; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.2); border-radius: 20px; }
         .book-card { transition: all 0.3s ease; background: white; border: 1px solid #e2e8f0; }
-        .book-card:hover { transform: translateY(-5px); border-color: var(--emerald); box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.1); }
-        .active-ch { background: #ecfdf5 !important; border-right: 4px solid var(--primary); }
+        .book-card:hover { transform: translateY(-5px); border-color: var(--emerald); box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.1); }
+        .active-ch { background: #ecfdf5 !important; border-right: 5px solid var(--primary); font-weight: bold; }
         @media (max-width: 768px) {
-            .mobile-drawer { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: white; height: 70vh; transform: translateY(100%); transition: 0.4s; border-radius: 20px 20px 0 0; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); }
+            .mobile-drawer { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: white; height: 75vh; transform: translateY(100%); transition: 0.5s cubic-bezier(0.32, 0.72, 0, 1); border-radius: 30px 30px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
             .drawer-open { transform: translateY(0); }
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-[100]">
+    <nav class="shrink-0 z-[110] px-6 py-4 flex justify-between items-center bg-white border-b border-emerald-50">
         <div class="flex items-center gap-3">
-            <div class="bg-emerald-500 text-white p-2 rounded-lg"><i class="fa-solid fa-book-halakhah"></i></div>
-            <h1 class="text-xl font-bold">NUR<span class="text-emerald-500">AI</span></h1>
+            <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-100">
+                <i class="fa-solid fa-moon"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-slate-800">NUR<span class="text-emerald-500">AI</span></h1>
+            </div>
         </div>
-        <button onclick="goHome()" id="homeBtn" class="hidden px-4 py-2 bg-slate-800 text-white rounded-lg text-sm">ہوم</button>
+        <button onclick="goHome()" id="homeBtn" class="hidden px-5 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
+            <i class="fa-solid fa-house-chimney ml-2"></i> ہوم
+        </button>
     </nav>
 
-    <main class="flex-1 relative overflow-hidden">
-        <section id="view-books" class="absolute inset-0 overflow-y-auto p-6">
-            <div class="max-w-6xl mx-auto text-center">
-                <h2 class="font-urdu text-4xl mb-10">حدیث انسائیکلوپیڈیا</h2>
+    <main class="flex-1 relative overflow-hidden flex flex-col">
+        <section id="view-books" class="absolute inset-0 z-10 custom-scroll p-6 md:p-12 overflow-y-auto">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="font-urdu text-4xl text-slate-800 mb-3">حدیث انسائیکلوپیڈیا</h2>
+                    <p class="text-xs text-emerald-600 font-bold tracking-widest uppercase">مطالعہ کے لیے کتاب کا انتخاب کریں</p>
+                </div>
                 <div id="grid-books" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="col-span-full py-20 text-emerald-500"><i class="fa-solid fa-spinner fa-spin text-3xl"></i></div>
+                    <div class="col-span-full py-20 text-center"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-emerald-500"></i></div>
                 </div>
             </div>
         </section>
 
-        <section id="view-reader" class="hidden h-full flex flex-col md:flex-row p-4 gap-4 overflow-hidden">
-            <aside id="chapter-side" class="mobile-drawer md:relative md:w-72 md:block bg-white border rounded-xl overflow-hidden flex flex-col">
-                <div class="p-4 bg-slate-50 border-b font-bold text-sm uppercase tracking-wider">ابواب</div>
-                <div id="list-chapters" class="flex-1 custom-scroll p-2"></div>
+        <section id="view-reader" class="hidden h-full flex flex-col md:flex-row p-4 md:p-6 gap-6 overflow-hidden">
+            <aside id="chapter-side" class="mobile-drawer md:relative md:w-80 bg-white border border-slate-100 rounded-[2rem] flex flex-col overflow-hidden shadow-sm">
+                <div class="p-5 bg-slate-50 border-b border-slate-100 shrink-0">
+                    <p id="book-title-sub" class="font-urdu text-emerald-700 font-bold">فہرستِ ابواب</p>
+                </div>
+                <div id="list-chapters" class="flex-1 custom-scroll p-3 space-y-1"></div>
             </aside>
 
             <div class="flex-1 flex flex-col overflow-hidden">
-                <button onclick="toggleDrawer()" class="md:hidden w-full p-3 mb-2 bg-emerald-600 text-white rounded-lg">فہرستِ ابواب</button>
-                <div id="reading-zone" class="flex-1 bg-white border rounded-xl custom-scroll p-6 shadow-sm">
-                    <div id="list-hadiths" class="max-w-3xl mx-auto space-y-12">
-                        <div class="text-center text-slate-400 py-20">
-                            <i class="fa-solid fa-book-open text-5xl mb-4"></i>
-                            <p class="font-urdu">مطالعہ شروع کرنے کے لیے باب منتخب کریں</p>
-                        </div>
+                <button onclick="toggleDrawer()" class="md:hidden w-full p-4 mb-3 bg-emerald-600 text-white rounded-2xl font-bold flex justify-between items-center shadow-lg">
+                    <span>ابواب منتخب کریں</span>
+                    <i class="fa-solid fa-list-ul"></i>
+                </button>
+
+                <div id="reading-zone" class="flex-1 bg-white border border-slate-100 rounded-[2rem] custom-scroll p-6 md:p-10 shadow-sm">
+                    <div id="placeholder" class="h-full flex flex-col items-center justify-center text-slate-300">
+                        <i class="fa-solid fa-feather-pointed text-6xl mb-4 opacity-20"></i>
+                        <p class="font-urdu text-xl">کسی باب پر کلک کریں</p>
                     </div>
+                    <div id="list-hadiths" class="max-w-3xl mx-auto space-y-16 pb-20"></div>
                 </div>
             </div>
         </section>
     </main>
 
-    <div id="overlay" onclick="toggleDrawer()" class="hidden fixed inset-0 bg-black/20 z-[150]"></div>
+    <div id="overlay" onclick="toggleDrawer()" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[150]"></div>
 
     <script>
         const API_KEY = "$2y$10$VNFcNBFqqU9zDN3owkrHNGOFscM9f1rrB1u3ovmqmEmeCpRLf8IW";
-        // Using a more reliable "Anywhere" proxy for GitHub
-        const PROXY = "https://cors-anywhere.herokuapp.com/"; 
-        // Fallback proxy if first one fails
-        const ALT_PROXY = "https://api.allorigins.win/raw?url=";
-
+        // Using AllOrigins as it's the most reliable for GitHub Pages
+        const PROXY = "https://api.allorigins.win/raw?url=";
         let activeSlug = "";
 
         async function apiRequest(path) {
-            const baseUrl = `https://hadithapi.com/api/${path}${path.includes('?') ? '&' : '?'}apiKey=${API_KEY}`;
+            const url = `https://hadithapi.com/api/${path}${path.includes('?') ? '&' : '?'}apiKey=${API_KEY}`;
             try {
-                // Try AllOrigins first as it doesn't require a temporary unlock
-                const response = await fetch(ALT_PROXY + encodeURIComponent(baseUrl));
-                if (!response.ok) throw new Error('Proxy failed');
-                return await response.json();
+                const res = await fetch(PROXY + encodeURIComponent(url));
+                if (!res.ok) throw new Error("API call failed");
+                return await res.json();
             } catch (err) {
-                console.error("Proxy Error, check console:", err);
+                console.error("Error:", err);
                 return null;
             }
         }
 
         async function loadBooks() {
-            const data = await apiRequest('books');
             const grid = document.getElementById('grid-books');
-            
+            const data = await apiRequest('books');
             if (!data || !data.books) {
-                grid.innerHTML = `<div class="col-span-full p-10 bg-red-50 text-red-600 rounded-lg font-urdu">
-                    سرور سے رابطہ نہیں ہو سکا - براہ کرم انٹرنیٹ یا پراکسی چیک کریں۔
-                </div>`;
+                grid.innerHTML = `<p class="col-span-full text-center font-urdu py-20 text-red-500">ڈیٹا لوڈ کرنے میں دشواری ہو رہی ہے۔ براہ کرم ریفریش کریں۔</p>`;
                 return;
             }
 
             grid.innerHTML = '';
             data.books.forEach(book => {
-                const div = document.createElement('div');
-                div.className = "book-card p-6 rounded-2xl cursor-pointer text-right";
-                div.onclick = () => openReader(book.bookSlug, book.bookName);
-                div.innerHTML = `
-                    <h3 class="font-urdu text-xl font-bold text-slate-800">${book.bookName}</h3>
-                    <p class="text-xs text-slate-500 mt-2 uppercase tracking-widest">${book.hadiths_count} Ahadith</p>
+                const card = document.createElement('div');
+                card.className = "book-card p-6 rounded-3xl cursor-pointer text-right";
+                card.onclick = () => openReader(book.bookSlug, book.bookName);
+                card.innerHTML = `
+                    <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4 mr-auto ml-0">
+                        <i class="fa-solid fa-book"></i>
+                    </div>
+                    <h3 class="font-urdu text-xl text-slate-800 font-bold">${book.bookName}</h3>
+                    <div class="mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">${book.hadiths_count} AHADITH</div>
                 `;
-                grid.appendChild(div);
+                grid.appendChild(card);
             });
         }
 
@@ -117,9 +127,10 @@
             document.getElementById('view-books').classList.add('hidden');
             document.getElementById('view-reader').classList.remove('hidden');
             document.getElementById('homeBtn').classList.remove('hidden');
-            
+            document.getElementById('book-title-sub').innerText = name;
+
             const chapBox = document.getElementById('list-chapters');
-            chapBox.innerHTML = '<div class="p-10 text-center"><i class="fa-solid fa-spinner fa-spin"></i></div>';
+            chapBox.innerHTML = '<div class="py-10 text-center"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i></div>';
 
             const data = await apiRequest(`${slug}/chapters`);
             if (!data) return;
@@ -127,11 +138,11 @@
             chapBox.innerHTML = '';
             data.chapters.forEach(ch => {
                 const btn = document.createElement('div');
-                btn.className = "p-3 mb-1 rounded-lg cursor-pointer text-right font-urdu text-sm hover:bg-slate-50 ch-item border border-transparent";
+                btn.className = "p-4 rounded-xl cursor-pointer text-right font-urdu text-sm hover:bg-emerald-50 transition-all ch-item";
                 btn.innerHTML = ch.chapterUrdu;
                 btn.onclick = () => {
-                    document.querySelectorAll('.ch-item').forEach(el => el.classList.remove('active-ch', 'border-emerald-200'));
-                    btn.classList.add('active-ch', 'border-emerald-200');
+                    document.querySelectorAll('.ch-item').forEach(el => el.classList.remove('active-ch'));
+                    btn.classList.add('active-ch');
                     loadHadiths(ch.chapterNumber);
                     if (window.innerWidth < 768) toggleDrawer();
                 };
@@ -141,23 +152,25 @@
 
         async function loadHadiths(id) {
             const list = document.getElementById('list-hadiths');
-            list.innerHTML = '<div class="py-20 text-center text-emerald-500"><i class="fa-solid fa-circle-notch fa-spin text-3xl"></i></div>';
+            document.getElementById('placeholder').classList.add('hidden');
+            list.innerHTML = '<div class="py-20 text-center"><i class="fa-solid fa-sun fa-spin text-emerald-500 text-3xl"></i></div>';
 
             const data = await apiRequest(`hadiths?book=${activeSlug}&chapter=${id}&paginate=50`);
             if (!data || !data.hadiths) return;
 
             list.innerHTML = '';
             data.hadiths.data.forEach(h => {
-                const art = document.createElement('article');
-                art.className = "border-b border-slate-100 pb-10";
-                art.innerHTML = `
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-3 py-1 rounded-full">HADITH ${h.hadithNumber}</span>
+                const card = document.createElement('article');
+                card.className = "space-y-8";
+                card.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <span class="text-[10px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">HADITH ${h.hadithNumber}</span>
+                        <div class="h-px bg-slate-100 flex-1"></div>
                     </div>
-                    <p class="font-arabic text-right mb-6" dir="rtl">${h.hadithArabic}</p>
-                    <p class="font-urdu text-slate-600 text-right" dir="rtl">${h.hadithUrdu}</p>
+                    <p class="font-arabic text-right leading-loose" dir="rtl">${h.hadithArabic}</p>
+                    <p class="font-urdu text-slate-600 text-right leading-relaxed" dir="rtl">${h.hadithUrdu}</p>
                 `;
-                list.appendChild(art);
+                list.appendChild(card);
             });
             document.getElementById('reading-zone').scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -173,7 +186,7 @@
             document.getElementById('homeBtn').classList.add('hidden');
         }
 
-        // Initialize
+        // Start
         loadBooks();
     </script>
 </body>
