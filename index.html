@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUR | The Digital Light</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+	 <link rel="icon" href="logo.png" type="image/png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Amiri:wght@400;700&family=Playfair+Display:ital,wght@0,900;1,900&display=swap');
+        
+        :root { --emerald: #10b981; --neon: #00ffaa; --slate-900: #0f172a; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fafafa; color: var(--slate-900); overflow-x: hidden; }
+        .serif { font-family: 'Playfair Display', serif; }
+
+        /* Advanced UI Effects */
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.4); }
+        .neon-border { border: 1px solid rgba(16, 185, 129, 0.2); transition: all 0.5s ease; }
+        .neon-border:hover { border-color: var(--emerald); box-shadow: 0 0 30px rgba(16, 185, 129, 0.2); }
+        
+        /* Animated Timeline Line */
+        .timeline-path { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: #f1f5f9; transform: translateX(-50%); overflow: hidden; }
+        #timeline-progress { position: absolute; top: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to bottom, transparent, var(--emerald), var(--neon)); transition: height 0.3s ease-out; }
+
+        /* Animated Shapes */
+        .shape { position: absolute; filter: blur(80px); opacity: 0.15; z-index: -1; animation: pulse 10s infinite alternate; }
+        @keyframes pulse { 0% { transform: scale(1) translate(0, 0); } 100% { transform: scale(1.2) translate(50px, 50px); } }
+
+        /* Section Reveal */
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 1s cubic-bezier(0.2, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 1024px) { .timeline-path { left: 30px; transform: none; } }
+    </style>
+</head>
+<body class="antialiased">
+
+    <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-[100] glass rounded-3xl border border-white/20 px-6 py-4 flex justify-between items-center shadow-2xl">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-emerald-400"><i class="fa-solid fa-bolt-lightning"></i></div>
+            <span class="text-xl font-black italic tracking-tighter">NUR<span class="text-emerald-500">.</span></span>
+        </div>
+        <div class="hidden lg:flex gap-8 font-bold text-[10px] uppercase tracking-widest text-slate-400">
+            <a href="quran.html" class="hover:text-emerald-500 transition">Quran</a>
+            <a href="hadees.html" class="hover:text-emerald-500 transition">Hadith</a>
+            <a href="https://education-point-360.github.io/NUR/" class="hover:text-emerald-500 transition">AI Tools</a>
+            <a href="adkhar.html" class="hover:text-emerald-500 transition">Adkhar</a>
+		   <a href="namaz.html" class="px-5 py-2 bg-slate-900 text-white rounded-xl hover:bg-emerald-500 transition shadow-xl">Prayer Hub</a>
+		    <a href="tabeeh.html" class="px-5 py-2 bg-slate-900 text-white rounded-xl hover:bg-emerald-500 transition shadow-xl">Tasbeeh</a>
+        </div>
+        <button onclick="toggleSidebar(true)" class="lg:hidden text-xl"><i class="fa-solid fa-bars-staggered"></i></button>
+    </nav>
+
+    <div id="sidebar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[110] hidden opacity-0 transition-opacity">
+        <div class="w-80 h-full bg-white ml-auto p-12 flex flex-col shadow-2xl">
+            <button onclick="toggleSidebar(false)" class="self-end text-3xl mb-12 text-slate-300"><i class="fa-solid fa-xmark"></i></button>
+            <nav class="flex flex-col gap-8 text-2xl font-black italic text-slate-800">
+                <a href="quran.html">Quran</a>
+                <a href="hadees.html">Hadith</a>
+                <a href="https://education-point-360.github.io/NUR/">AI Assistant</a>
+                <a href="namaz.html">Prayer Hub</a>
+                <a href="tabeeh.html">Tasbeeh</a>
+				<a href="adkhar.html">Adkhar</a>
+            </nav>
+        </div>
+    </div>
+
+    <header class="h-screen flex items-center justify-center text-center px-6 relative overflow-hidden bg-white">
+        <div class="shape w-96 h-96 bg-emerald-400 top-20 left-10"></div>
+        <div class="shape w-96 h-96 bg-blue-400 bottom-20 right-10" style="animation-delay: -5s"></div>
+        
+        <div class="z-10">
+            <h2 class="animate__animated animate__fadeInDown text-emerald-500 font-bold uppercase tracking-[0.6em] text-[10px] mb-6">Innovating Faith & Education</h2>
+            <h1 class="animate__animated animate__zoomIn serif text-7xl md:text-[10rem] font-black italic text-slate-900 leading-[0.8] mb-8">
+                NUR <br> <span class="text-emerald-500">Portal.</span>
+            </h1>
+            <p class="animate__animated animate__fadeInUp animate__delay-1s text-slate-400 max-w-xl mx-auto text-lg md:text-xl font-medium mb-12">
+                "Knowledge, Faith, and Technology in Harmony." Crafted for the global community by Muhammad Rizwan.
+            </p>
+            <div class="animate__animated animate__fadeInUp animate__delay-1s flex flex-wrap justify-center gap-6">
+                <a href="#biography" class="px-12 py-5 bg-slate-900 text-white rounded-2xl font-black shadow-2xl hover:scale-105 transition">The Journey</a>
+                <a href="https://education-point-360.github.io/NUR/" class="px-12 py-5 bg-white border border-slate-200 rounded-2xl font-black hover:border-emerald-500 transition">Nur AI Engine</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="py-16 bg-slate-900 relative">
+        <div class="max-w-4xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 text-center">
+            <div class="reveal">
+                <h6 class="text-emerald-400 font-black uppercase text-[9px] tracking-widest mb-3">Universal Time</h6>
+                <p id="clock" class="text-4xl font-black text-white tracking-widest">00:00:00</p>
+            </div>
+            <div class="reveal md:border-l border-white/10 px-8">
+                <h6 class="text-emerald-400 font-black uppercase text-[9px] tracking-widest mb-3">Live Context</h6>
+                <p id="location" class="text-xl font-bold text-white italic"><i class="fa-solid fa-location-arrow text-xs mr-2 animate-bounce"></i>Syncing Location...</p>
+            </div>
+        </div>
+    </section>
+
+    <style>
+    /* Glassmorphism Classes - Clear/White Theme */
+    .glass-card-light {
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    
+    .glass-btn-light {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        transition: all 0.3s ease;
+    }
+    .glass-btn-light:hover {
+        background: rgba(255, 255, 255, 0.8);
+        transform: translateY(-2px);
+    }
+
+    /* Modern Timeline Rail styling */
+    .timeline-path-light {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: rgba(226, 232, 240, 0.5); /* Slate-200, but lighter */
+        transform: translateX(-50%);
+        overflow: hidden;
+    }
+    
+    #timeline-progress-light {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0%;
+        background: linear-gradient(to bottom, #10b981, #06b6d4, #f59e0b); /* Emerald to Cyan to Amber */
+        transition: height 0.3s ease-out;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+    }
+
+    /* Checkpoint Node Styling */
+    .timeline-node-light {
+        position: absolute;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border: 4px solid #e2e8f0; /* Slate-200 */
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        transition: all 0.6s ease;
+    }
+    .timeline-node-light.active {
+        border-color: #10b981; /* Emerald */
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+    }
+
+    /* Scroll Reveal - Clip-path "wipe" effect */
+    .reveal-wipe {
+        opacity: 0;
+        clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%);
+        transition: all 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+    .reveal-wipe.active {
+        opacity: 1;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+    }
+
+    @media (max-width: 1024px) {
+        .timeline-path-light, .timeline-node-light { display: none; }
+    }
+</style>
+
+<section id="biography" class="relative py-40 bg-white overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.03] pointer-events-none">
+        <i class="fa-solid fa-kaaba text-[30rem] absolute -top-20 -left-20 text-emerald-200"></i>
+        <i class="fa-solid fa-graduation-cap text-[30rem] absolute -bottom-20 -right-20 text-amber-200"></i>
+    </div>
+
+    <div class="timeline-path-light"><div id="timeline-progress-light"></div></div>
+
+    <div class="max-w-6xl mx-auto px-6 space-y-48 lg:space-y-80 relative">
+        
+        <div class="reveal-wipe flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative">
+            <div class="timeline-node-light lg:block hidden top-1/2" id="node-1"></div>
+            
+            <div class="w-full lg:w-1/2 flex justify-center">
+                <div class="relative group">
+                    <div class="absolute -inset-4 bg-emerald-500 rounded-[5rem] opacity-10 blur-2xl group-hover:opacity-20 transition duration-700"></div>
+                    <div class="relative w-64 h-64 lg:w-96 lg:h-96 bg-white p-6 rounded-[5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] flex items-center justify-center border border-slate-100 group-hover:border-emerald-200 transition duration-500">
+                        <i class="fa-solid fa-user-graduate text-[10rem] text-slate-100 group-hover:scale-105 group-hover:text-emerald-50 transition duration-500"></i>
+                        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-3xl flex items-center justify-center text-white text-4xl shadow-xl animate-bounce"><i class="fa-solid fa-award"></i></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
+                <div class="inline-block px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">The Founder Profile</div>
+                <h3 class="serif text-5xl lg:text-7xl font-black italic text-slate-900 leading-none">Muhammad Rizwan</h3>
+                <div class="space-y-6 text-slate-600 text-lg leading-relaxed">
+                    <p>Muhammad Rizwan is a dedicated student and passionate knowledge seeker with a vision to empower others through education and Islamic awareness. Since his early days, he has been committed to creating resources that are accessible, informative, and engaging.</p>
+                    <p class="font-bold text-slate-900 border-l-4 border-emerald-500 pl-4">Achievements & Contributions:</p>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm font-medium pt-2">
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> Founder of NUR and Education Point</li>
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> AI Resource Developer</li>
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> Islamic Content Creator</li>
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> Learning Advocate</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="reveal-wipe flex flex-col-reverse lg:flex-row items-center gap-16 lg:gap-32 relative">
+            <div class="timeline-node-light lg:block hidden top-1/2" id="node-2"></div>
+            
+            <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
+                <div class="inline-block px-4 py-1.5 bg-cyan-50 text-cyan-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">The Platform</div>
+                <h3 class="serif text-5xl lg:text-7xl font-black italic text-slate-900 leading-none">The NUR <br>Portal</h3>
+                <p class="text-emerald-500 font-black italic text-xl">"Knowledge, Faith, and Technology in Harmony"</p>
+                <p class="text-slate-600 text-lg leading-relaxed">NUR is a comprehensive Islamic and educational portal designed to provide students and learners with easy access to authentic knowledge. It blends modern technology with traditional Islamic teachings.</p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6 pt-6">
+                    <div class="glass-card-light p-6 rounded-3xl hover:border-cyan-400 hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
+                        <i class="fa-solid fa-book-quran text-3xl text-cyan-500 mb-4 block"></i>
+                        <h6 class="text-slate-800 font-bold text-xs">Quran Hub</h6>
+                    </div>
+                    <div class="glass-card-light p-6 rounded-3xl hover:border-cyan-400 hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
+                        <i class="fa-solid fa-robot text-3xl text-cyan-500 mb-4 block"></i>
+                        <h6 class="text-slate-800 font-bold text-xs">AI Tools</h6>
+                    </div>
+                    <div class="glass-card-light p-6 rounded-3xl hover:border-cyan-400 hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
+                        <i class="fa-solid fa-mosque text-3xl text-cyan-500 mb-4 block"></i>
+                        <h6 class="text-slate-800 font-bold text-xs">Prayer Guide</h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w-full lg:w-1/2 flex justify-center">
+                <div class="w-72 h-72 lg:w-[32rem] lg:h-[32rem] bg-slate-900 rounded-[6rem] shadow-2xl flex items-center justify-center relative overflow-hidden group border border-slate-700">
+                    <div class="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition duration-700"></div>
+                    <i class="fa-solid fa-moon text-[10rem] lg:text-[15rem] text-transparent bg-clip-text bg-gradient-to-t from-emerald-400 to-cyan-400 group-hover:scale-110 transition duration-700 z-10"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="reveal-wipe flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative">
+            <div class="timeline-node-light lg:block hidden top-1/2" id="node-3"></div>
+            
+            <div class="w-full lg:w-1/2 flex justify-center">
+                <div class="relative p-12 lg:p-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[5rem] shadow-[0_30px_60px_rgba(245,158,11,0.2)] text-white overflow-hidden group">
+                    <i class="fa-solid fa-graduation-cap text-[8rem] lg:text-[15rem] opacity-10 absolute bottom-10 right-10 group-hover:rotate-12 transition-transform duration-700"></i>
+                    <h4 class="text-4xl lg:text-6xl font-black italic mb-8 relative z-10">Empowering <br>Global <br>Learners.</h4>
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="w-12 h-1 bg-white rounded-full"></div>
+                        <p class="font-bold text-xs uppercase tracking-widest">Education Point</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
+                <div class="inline-block px-4 py-1.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">The Mission</div>
+                <h3 class="serif text-5xl lg:text-7xl font-black italic text-slate-900 leading-none">Education <br>Point</h3>
+                <p class="text-slate-600 text-lg leading-relaxed">Purpose: A hub for educational excellence, offering curated content, tutorials, and interactive tools for students across various subjects. Successfully launched multiple interactive learning sections, including Quran, Hadith, AI tools, Namaz, Tasbeeh, and Azkhar.</p>
+                
+                <div class="p-8 glass-card-light rounded-3xl border border-slate-100 shadow-xl group hover:border-amber-300 hover:shadow-2xl hover:bg-white transition-all duration-500 relative overflow-hidden">
+                    <div class="absolute left-0 top-0 w-1 h-full bg-amber-500 rounded-l-3xl"></div>
+                    <p class="font-bold italic text-slate-800 text-xl group-hover:text-slate-900 transition-colors">"To empower students and learners to excel academically while maintaining strong spiritual and moral values."</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<script>
+    window.addEventListener('scroll', () => {
+        // Timeline Progress Line
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (winScroll / height) * 100;
+        document.getElementById("timeline-progress-light").style.height = scrolled + "%";
+
+        // Scroll Reveal Wipe Animation
+        const reveals = document.querySelectorAll(".reveal-wipe");
+        const nodes = document.querySelectorAll(".timeline-node-light");
+
+        reveals.forEach((el, index) => {
+            if (el.getBoundingClientRect().top < window.innerHeight - 100) {
+                el.classList.add("active");
+                // Activate the corresponding timeline node
+                if(nodes[index]) nodes[index].classList.add("active");
+            } else {
+                el.classList.remove("active");
+                if(nodes[index]) nodes[index].classList.remove("active");
+            }
+        });
+    });
+</script>
+
+    <footer class="bg-slate-900 pt-24 pb-12 px-8 overflow-hidden relative">
+        <div class="max-w-7xl mx-auto relative z-10 text-center md:text-left">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-20 mb-16 pb-16 border-b border-white/5">
+                <div class="space-y-6">
+                    <h3 class="text-3xl font-black text-white italic">NUR<span class="text-emerald-500">.</span></h3>
+                    <p class="text-slate-400 font-medium">Merging ancient wisdom with modern technology.</p>
+                </div>
+                <div class="flex justify-around md:justify-start md:gap-20">
+                    <div>
+                        <h6 class="text-emerald-400 font-black uppercase text-[9px] mb-6 tracking-widest">Main Hubs</h6>
+                        <ul class="text-slate-500 space-y-3 font-bold text-xs">
+                            <li><a href="quran.html">Quran</a></li>
+                            <li><a href="https://education-point-360.github.io/NUR/">AI Tools</a></li>
+                            <li><a href="namaz.html">Namaz</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+            </div>
+            <p class="text-center text-slate-600 text-[10px] font-black uppercase tracking-[0.5em]">&copy; 2026 NUR HUB | EDUCATION POINT | MUHAMMAD RIZWAN</p>
+        </div>
+    </footer>
+
+    <script>
+        // SIDEBAR ENGINE
+        function toggleSidebar(open) {
+            const side = document.getElementById('sidebar');
+            if(open) {
+                side.classList.remove('hidden');
+                setTimeout(() => side.classList.add('opacity-100'), 10);
+            } else {
+                side.classList.remove('opacity-100');
+                setTimeout(() => side.classList.add('hidden'), 300);
+            }
+        }
+
+        // CLOCK SYSTEM
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
+
+        // LOCATION ENGINE (Removed Prayer Logic)
+        async function fetchDashboard() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    try {
+                        const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=en`);
+                        const data = await res.json();
+                        document.getElementById('location').innerText = `${data.city}, ${data.countryCode}`;
+                    } catch (e) { document.getElementById('location').innerText = "Location Active"; }
+                });
+            }
+        }
+
+        // SCROLL REVEAL & PROGRESS ENGINE
+        window.addEventListener('scroll', () => {
+            const reveals = document.querySelectorAll(".reveal");
+            reveals.forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 100) el.classList.add("active");
+            });
+
+            const winScroll = window.scrollY;
+            const height = document.documentElement.scrollHeight - window.innerHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("timeline-progress").style.height = scrolled + "%";
+        });
+
+        fetchDashboard();
+    </script>
+</body>
+</html>

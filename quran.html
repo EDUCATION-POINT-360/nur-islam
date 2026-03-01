@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NUR QURAN | Premium Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+	 <link rel="icon" href="logo.png" type="image/png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --slate-900: #0f172a; }
+        body { background: #ffffff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--slate-900); }
+        
+        /* Smooth Typography */
+        .font-urdu { font-family: 'Noto Nastaliq Urdu', serif; line-height: 3.2; }
+        .font-arabic { font-family: 'Amiri', serif; line-height: 1.8; font-size: 2.8rem; }
+
+        /* Advanced Animations */
+        @keyframes ultraSlide {
+            0% { opacity: 0; transform: translateY(40px) scale(0.98); filter: blur(10px); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+        .animate-ultra { animation: ultraSlide 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        @keyframes pulseBorder {
+            0% { border-color: rgba(15, 23, 42, 0.1); }
+            50% { border-color: rgba(15, 23, 42, 0.5); }
+            100% { border-color: rgba(15, 23, 42, 0.1); }
+        }
+        .last-read-glow { animation: pulseBorder 2s infinite; }
+
+        /* Component Styles */
+        .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(25px); border-bottom: 1px solid #f1f5f9; }
+        .surah-card { background: #fdfdfd; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid #f1f5f9; }
+        .surah-card:hover { transform: translateY(-8px); border-color: var(--slate-900); background: white; box-shadow: 0 20px 40px rgba(0,0,0,0.06); }
+        
+        .player-bar { background: white; border-top: 1px solid #f1f5f9; transform: translateY(100%); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .player-bar.active { transform: translateY(0); }
+
+        .custom-scroll::-webkit-scrollbar { width: 3px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; }
+        .reader-spacer { height: 200px; }
+    </style>
+</head>
+<body>
+
+    <header class="glass-header sticky top-0 z-[100] px-6 py-5 flex justify-between items-center">
+        <div class="flex items-center gap-4 cursor-pointer" onclick="goHome()">
+            <div class="w-12 h-12 bg-slate-900 text-white rounded-[1.2rem] flex items-center justify-center shadow-2xl rotate-3 hover:rotate-0 transition-all duration-500">
+                <i class="fa-solid fa-kaaba text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-black tracking-tighter">NUR <span class="text-slate-300 font-light">PRO</span></h1>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button onclick="goHome()" id="homeBtn" class="hidden h-11 w-11 bg-slate-100 rounded-xl flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <div id="last-read-badge" class="hidden md:flex items-center gap-2 bg-slate-50 border border-slate-100 px-4 py-2 rounded-xl cursor-pointer hover:bg-slate-100 transition-all" onclick="loadLastRead()">
+                <i class="fa-solid fa-clock-rotate-left text-slate-400 text-xs"></i>
+                <span id="last-read-name" class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Continue</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 relative overflow-hidden">
+        
+        <section id="view-index" class="h-full overflow-y-auto custom-scroll p-6 md:p-12">
+            <div id="mobile-last-read" class="md:hidden hidden mb-8 p-5 rounded-3xl bg-slate-900 text-white flex justify-between items-center animate-ultra" onclick="loadLastRead()">
+                <div>
+                    <p class="text-[9px] uppercase tracking-widest opacity-60">آخری بار پڑھا گیا</p>
+                    <h2 id="mobile-last-name" class="font-bold text-lg">Surah</h2>
+                </div>
+                <i class="fa-solid fa-play-circle text-3xl"></i>
+            </div>
+
+            <div id="grid-surah" class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-32">
+                </div>
+        </section>
+
+        <section id="view-reader" class="hidden h-full overflow-y-auto custom-scroll px-5 md:px-0">
+            <div id="ayat-display" class="max-w-4xl mx-auto py-16 space-y-32">
+                </div>
+            <div class="reader-spacer"></div>
+        </section>
+
+        <div id="player-ui" class="player-bar fixed bottom-0 left-0 right-0 p-6 z-[200]">
+            <div class="max-w-5xl mx-auto flex items-center gap-6">
+                <div class="relative">
+                    <button id="master-play" onclick="toggleAudio()" class="w-16 h-16 bg-slate-900 text-white rounded-full flex items-center justify-center text-2xl shadow-xl active:scale-90 transition-all">
+                        <i class="fa-solid fa-play ml-1"></i>
+                    </button>
+                </div>
+                
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-end mb-3">
+                        <div class="truncate">
+                            <h3 id="playing-name" class="font-black text-xl text-slate-900 leading-tight">Surah</h3>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Mishary Rashid Alafasy</p>
+                        </div>
+                        <span id="time-cur" class="text-xs font-mono font-bold text-slate-400">00:00</span>
+                    </div>
+                    <div class="relative h-1.5 w-full bg-slate-100 rounded-full overflow-hidden cursor-pointer" onclick="seek(event)">
+                        <div id="progress-bar" class="absolute h-full bg-slate-900 w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <audio id="audio-engine" ontimeupdate="onTimeUpdate()" onended="onAudioEnd()"></audio>
+
+    <script>
+        const API = "https://api.alquran.cloud/v1";
+        const audio = document.getElementById('audio-engine');
+        let allSurahs = [];
+
+        async function init() {
+            checkLastRead();
+            const grid = document.getElementById('grid-surah');
+            grid.innerHTML = Array(12).fill(0).map(() => `<div class="h-44 bg-slate-50 animate-pulse rounded-[2rem]"></div>`).join('');
+            try {
+                const res = await fetch(`${API}/surah`);
+                const json = await res.json();
+                allSurahs = json.data;
+                render(allSurahs);
+            } catch (e) { grid.innerHTML = "Error Loading Library."; }
+        }
+
+        function render(data) {
+            const grid = document.getElementById('grid-surah');
+            grid.innerHTML = data.map((s, i) => `
+                <div class="surah-card p-8 rounded-[2.5rem] animate-ultra" style="animation-delay: ${i*0.03}s" onclick="loadSurah(${s.number}, '${s.englishName}')">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-[10px] font-black bg-slate-900 text-white w-9 h-9 flex items-center justify-center rounded-xl shadow-lg">${s.number}</span>
+                        <span class="font-arabic text-2xl opacity-20">${s.name}</span>
+                    </div>
+                    <h3 class="font-black text-slate-900 text-lg mb-1">${s.englishName}</h3>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">${s.numberOfAyahs} Ayahs • ${s.revelationType}</p>
+                </div>
+            `).join('');
+        }
+
+        async function loadSurah(id, name) {
+            // Save Memory
+            localStorage.setItem('lastReadId', id);
+            localStorage.setItem('lastReadName', name);
+            checkLastRead();
+
+            document.getElementById('view-index').classList.add('hidden');
+            const reader = document.getElementById('view-reader');
+            reader.classList.remove('hidden');
+            document.getElementById('homeBtn').classList.remove('hidden');
+            document.getElementById('player-ui').classList.add('active');
+            document.getElementById('playing-name').innerText = name;
+            reader.scrollTop = 0;
+
+            const display = document.getElementById('ayat-display');
+            display.innerHTML = `<div class="text-center py-40"><i class="fa-solid fa-spinner fa-spin text-4xl text-slate-200"></i></div>`;
+
+            try {
+                const [ar, ur] = await Promise.all([
+                    fetch(`${API}/surah/${id}/ar.alafasy`),
+                    fetch(`${API}/surah/${id}/ur.jalandhry`)
+                ]);
+                const arJ = await ar.json();
+                const urJ = await ur.json();
+
+                audio.src = `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${id}.mp3`;
+                audio.load();
+
+                display.innerHTML = arJ.data.ayahs.map((ayah, i) => `
+                    <div class="text-right animate-ultra" style="animation-delay: ${i*0.08}s">
+                        <div class="flex items-center gap-4 mb-10 justify-end">
+                            <span class="text-[10px] font-black text-slate-300 border border-slate-100 px-4 py-1 rounded-full">${id}:${ayah.numberInSurah}</span>
+                            <div class="h-px w-20 bg-slate-50"></div>
+                        </div>
+                        <p class="font-arabic text-slate-900 mb-10 leading-relaxed">${ayah.text}</p>
+                        <p class="font-urdu text-slate-400 text-xl md:text-2xl">${urJ.data.ayahs[i].text}</p>
+                    </div>
+                `).join('');
+            } catch (e) { display.innerHTML = "Error loading verses."; }
+        }
+
+        function checkLastRead() {
+            const id = localStorage.getItem('lastReadId');
+            const name = localStorage.getItem('lastReadName');
+            if(id && name) {
+                document.getElementById('last-read-badge').classList.remove('hidden');
+                document.getElementById('last-read-name').innerText = name;
+                document.getElementById('mobile-last-read').classList.remove('hidden');
+                document.getElementById('mobile-last-name').innerText = name;
+            }
+        }
+
+        function loadLastRead() {
+            const id = localStorage.getItem('lastReadId');
+            const name = localStorage.getItem('lastReadName');
+            if(id) loadSurah(id, name);
+        }
+
+        function toggleAudio() {
+            const btn = document.getElementById('master-play');
+            if(audio.paused) { audio.play(); btn.innerHTML = '<i class="fa-solid fa-pause"></i>'; }
+            else { audio.pause(); btn.innerHTML = '<i class="fa-solid fa-play ml-1"></i>'; }
+        }
+
+        function onTimeUpdate() {
+            const pct = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('progress-bar').style.width = pct + '%';
+            const m = Math.floor(audio.currentTime / 60);
+            const s = Math.floor(audio.currentTime % 60);
+            document.getElementById('time-cur').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+        }
+
+        function seek(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            audio.currentTime = (x / rect.width) * audio.duration;
+        }
+
+        function onAudioEnd() { document.getElementById('master-play').innerHTML = '<i class="fa-solid fa-play ml-1"></i>'; }
+
+        function goHome() {
+            document.getElementById('view-index').classList.remove('hidden');
+            document.getElementById('view-reader').classList.add('hidden');
+            document.getElementById('homeBtn').classList.add('hidden');
+            document.getElementById('player-ui').classList.remove('active');
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUR ADKHAR | Visual Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	 <link rel="icon" href="logo.png" type="image/png" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        
+        body { 
+            background: #020617; font-family: 'Plus Jakarta Sans', sans-serif; 
+            height: 100vh; margin: 0; overflow: hidden; color: white;
+            display: flex; flex-direction: column;
+        }
+
+        .glass-header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* The Animated Tasbeeh */
+        .tasbeeh-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tasbeeh-ball {
+            width: 100px; height: 100px;
+            background: radial-gradient(circle at 30% 30%, #10b981, #064e3b);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4), inset -5px -5px 15px rgba(0,0,0,0.4);
+            cursor: pointer; transition: transform 0.1s ease;
+            user-select: none;
+            border: 3px solid rgba(255,255,255,0.1);
+        }
+        .tasbeeh-ball:active { transform: scale(0.9); }
+
+        .counter-glow {
+            font-size: 2rem; font-weight: 900;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        /* PDF Viewport */
+        .viewer-main {
+            flex: 1; position: relative;
+            background: #000; border-radius: 2rem 2rem 0 0;
+            overflow: hidden; margin-top: 10px;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* Smooth Switch Button */
+        .switch-btn {
+            background: rgba(255,255,255,0.05);
+            padding: 10px 20px; border-radius: 12px;
+            font-size: 12px; font-weight: 700;
+            transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .switch-btn.active {
+            background: #10b981; border-color: #10b981;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .floating { animation: float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+
+    <header class="glass-header p-5 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-kaaba text-white text-xl"></i>
+            </div>
+            <h1 class="text-xl font-extrabold tracking-tighter">NUR <span class="text-emerald-500">ADKHAR</span></h1>
+        </div>
+
+        <div class="flex gap-2 bg-slate-900/50 p-1 rounded-xl">
+            <button id="b1" class="switch-btn active" onclick="loadPDF('https://www.sunnahliving.com/wp-content/uploads/2020/05/ampm-remembrance.pdf', 'b1')">
+                Adkhar Book
+            </button>
+            <button id="b2" class="switch-btn" onclick="loadPDF('https://www.sunnahliving.com/wp-content/uploads/2020/03/english-transliteration.pdf', 'b2')">
+                English Guide
+            </button>
+        </div>
+    </header>
+
+    <main class="viewer-main">
+        <div id="loader" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 z-10">
+            <div class="w-10 h-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-[10px] font-bold tracking-widest text-emerald-500">OPENING PDF</p>
+        </div>
+        <iframe id="main-frame" src="https://docs.google.com/viewer?url=https://www.sunnahliving.com/wp-content/uploads/2020/05/ampm-remembrance.pdf&embedded=true"></iframe>
+    </main>
+
+    <div class="tasbeeh-container floating">
+        <div class="tasbeeh-ball" onclick="doCount()">
+            <span id="display" class="counter-glow">0</span>
+        </div>
+        <button onclick="resetCount()" class="text-[10px] font-bold text-slate-500 hover:text-red-500 uppercase">Reset</button>
+    </div>
+
+    <script>
+        let count = 0;
+        const frame = document.getElementById('main-frame');
+        const loader = document.getElementById('loader');
+
+        function doCount() {
+            count++;
+            document.getElementById('display').innerText = count;
+            
+            // Goal feedback
+            if (count === 33) {
+                document.getElementById('display').classList.add('text-yellow-400');
+            }
+        }
+
+        function resetCount() {
+            count = 0;
+            document.getElementById('display').innerText = 0;
+            document.getElementById('display').classList.remove('text-yellow-400');
+        }
+
+        function loadPDF(url, btnId) {
+            loader.style.display = 'flex';
+            frame.src = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+            
+            // Button UI
+            document.querySelectorAll('.switch-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(btnId).classList.add('active');
+        }
+
+        frame.onload = () => {
+            setTimeout(() => { loader.style.display = 'none'; }, 1000);
+        };
+    </script>
+</body>
+</html>

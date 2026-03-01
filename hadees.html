@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NUR HADITH | Ultra Visual Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+	 <link rel="icon" href="logo.png" type="image/png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --emerald: #10b981; --primary: #059669; --glass: rgba(255, 255, 255, 0.7); }
+        
+        body { 
+            background: radial-gradient(circle at top right, #f0fdf4, #ffffff);
+            color: #1e293b; 
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        /* Typography */
+        .font-urdu { font-family: 'Noto Nastaliq Urdu', serif; line-height: 2.8; font-size: 1.15rem; }
+        .font-arabic { font-family: 'Amiri', serif; line-height: 1.8; font-size: 1.9rem; color: #0f172a; }
+
+        /* Independent Scroll Containers */
+        .custom-scroll { overflow-y: auto; scroll-behavior: smooth; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.2); border-radius: 20px; }
+
+        /* Animations */
+        @keyframes floatIn {
+            0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .reveal { animation: floatIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+        
+        .book-card { 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+        }
+        .book-card:hover { 
+            transform: translateY(-10px); 
+            background: white;
+            box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.15);
+        }
+
+        .chapter-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .chapter-btn::after {
+            content: ''; position: absolute; left: 0; bottom: 0; height: 100%; width: 0;
+            background: rgba(16, 185, 129, 0.1); transition: width 0.3s ease;
+        }
+        .chapter-btn:hover::after { width: 100%; }
+        .active-ch { background: #ecfdf5 !important; border-right: 5px solid var(--primary); font-weight: bold; transform: scale(1.02); }
+
+        /* Mobile Drawer */
+        @media (max-width: 768px) {
+            .mobile-drawer { 
+                position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+                background: white; border-radius: 30px 30px 0 0;
+                height: 80vh; transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+            }
+            .drawer-open { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col">
+
+    <nav class="shrink-0 z-[110] px-6 py-4 flex justify-between items-center backdrop-blur-md border-b border-emerald-50">
+        <div class="flex items-center gap-4">
+            <div class="w-11 h-11 bg-gradient-to-tr from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-200 rotate-3">
+                <i class="fa-solid fa-moon text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-black text-slate-800 tracking-tight">NUR<span class="text-emerald-500">AI</span></h1>
+                <p class="text-[9px] uppercase font-bold text-emerald-600/60 tracking-widest">Global Hadith Engine</p>
+            </div>
+        </div>
+        <button onclick="goHome()" id="homeBtn" class="hidden px-6 py-2.5 bg-slate-900 text-white rounded-2xl text-xs font-bold hover:bg-emerald-600 transition-all active:scale-90 shadow-xl shadow-slate-200">
+            <i class="fa-solid fa-house-chimney ml-2"></i> ہوم
+        </button>
+    </nav>
+
+    <main class="flex-1 relative overflow-hidden flex flex-col">
+        
+        <section id="view-books" class="absolute inset-0 z-10 custom-scroll p-6 md:p-12 overflow-y-auto">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="font-urdu text-5xl text-slate-800 mb-4">حدیث انسائیکلوپیڈیا</h2>
+                    <span class="px-4 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-widest">Select a Book to Begin</span>
+                </div>
+                <div id="grid-books" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    </div>
+            </div>
+        </section>
+
+        <section id="view-reader" class="hidden h-full flex flex-col md:flex-row p-4 md:p-6 gap-6 overflow-hidden">
+            
+            <aside id="chapter-side" class="mobile-drawer md:relative md:w-80 bg-white/60 backdrop-blur-md border border-white rounded-[2.5rem] flex flex-col overflow-hidden shadow-2xl md:shadow-sm">
+                <div class="p-6 bg-gradient-to-r from-emerald-50 to-transparent border-b border-emerald-100 shrink-0">
+                    <h3 class="text-xs font-black text-emerald-800 tracking-widest uppercase mb-1">Chapters</h3>
+                    <p id="book-title-sub" class="font-urdu text-sm text-slate-400">فہرستِ ابواب</p>
+                </div>
+                <div id="list-chapters" class="flex-1 custom-scroll p-3 space-y-2">
+                    </div>
+            </aside>
+
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <button onclick="toggleDrawer()" class="md:hidden w-full p-4 mb-4 bg-emerald-600 text-white rounded-2xl font-bold flex justify-between items-center shadow-lg">
+                    <span>ابواب منتخب کریں</span>
+                    <i class="fa-solid fa-list-ul"></i>
+                </button>
+
+                <div id="reading-zone" class="flex-1 bg-white/80 backdrop-blur-sm border border-white rounded-[3rem] custom-scroll p-6 md:p-12 shadow-inner-lg">
+                    <div id="placeholder" class="h-full flex flex-col items-center justify-center text-slate-300 opacity-40">
+                        <i class="fa-solid fa-feather-pointed text-8xl mb-6"></i>
+                        <p class="font-urdu text-2xl">ترجمہ یہاں نظر آئے گا</p>
+                    </div>
+                    <div id="list-hadiths" class="max-w-3xl mx-auto space-y-20 pb-32">
+                        </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="overlay" onclick="toggleDrawer()" class="hidden fixed inset-0 bg-emerald-900/20 backdrop-blur-sm z-[150]"></div>
+
+    <script>
+        const API_KEY = "$2y$10$VNFcNBFqqU9zDN3owkrHNGOFscM9f1rrB1u3ovmqmEmeCpRLf8IW";
+        const PROXY = "https://corsproxy.io/?";
+        let activeSlug = "";
+
+        async function apiRequest(path) {
+            const url = `https://hadithapi.com/api/${path}${path.includes('?') ? '&' : '?'}apiKey=${API_KEY}`;
+            const res = await fetch(PROXY + encodeURIComponent(url));
+            return await res.json();
+        }
+
+        async function loadBooks() {
+            const grid = document.getElementById('grid-books');
+            const data = await apiRequest('books');
+            if (!data) return;
+
+            grid.innerHTML = '';
+            data.books.forEach((book, i) => {
+                const card = document.createElement('div');
+                card.className = "book-card p-8 rounded-[3rem] border border-white cursor-pointer reveal";
+                card.style.animationDelay = `${i * 0.1}s`;
+                card.onclick = () => openReader(book.bookSlug, book.bookName);
+                card.innerHTML = `
+                    <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-book-open-reader text-2xl"></i>
+                    </div>
+                    <h3 class="font-urdu text-2xl text-slate-800 leading-snug">${book.bookName}</h3>
+                    <div class="mt-6 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${book.hadiths_count} AHADITH</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function openReader(slug, name) {
+            activeSlug = slug;
+            document.getElementById('view-books').classList.add('hidden');
+            document.getElementById('view-reader').classList.remove('hidden');
+            document.getElementById('homeBtn').classList.remove('hidden');
+            document.getElementById('book-title-sub').innerText = name;
+
+            const chapBox = document.getElementById('list-chapters');
+            chapBox.innerHTML = '<div class="py-20 text-center"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500 text-2xl"></i></div>';
+
+            const data = await apiRequest(`${slug}/chapters`);
+            if (!data) return;
+
+            chapBox.innerHTML = '';
+            data.chapters.forEach(ch => {
+                const btn = document.createElement('div');
+                btn.className = "chapter-btn p-5 rounded-2xl cursor-pointer text-right font-urdu text-sm hover:text-emerald-700 transition-all ch-item";
+                btn.innerHTML = `<span class="text-[9px] font-mono opacity-20 block mb-1">CHAPTER ${ch.chapterNumber}</span> ${ch.chapterUrdu}`;
+                btn.onclick = () => {
+                    document.querySelectorAll('.ch-item').forEach(el => el.classList.remove('active-ch'));
+                    btn.classList.add('active-ch');
+                    loadHadiths(ch.chapterNumber);
+                    if (window.innerWidth < 768) toggleDrawer();
+                };
+                chapBox.appendChild(btn);
+            });
+        }
+
+        async function loadHadiths(id) {
+            const list = document.getElementById('list-hadiths');
+            document.getElementById('placeholder').classList.add('hidden');
+            list.innerHTML = '<div class="py-40 text-center"><i class="fa-solid fa-sun fa-spin text-emerald-500 text-4xl"></i><p class="mt-4 font-urdu text-slate-400">ترجمہ لوڈ ہو رہا ہے...</p></div>';
+
+            const data = await apiRequest(`hadiths?book=${activeSlug}&chapter=${id}&paginate=50`);
+            if (!data) return;
+
+            list.innerHTML = '';
+            data.hadiths.data.forEach((h, i) => {
+                const card = document.createElement('article');
+                card.className = "reveal opacity-0";
+                card.style.animationDelay = `${i * 0.15}s`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-4 mb-8">
+                        <span class="w-12 h-px bg-slate-100"></span>
+                        <span class="text-[10px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full uppercase">Hadith ${h.hadithNumber}</span>
+                        <span class="w-full h-px bg-slate-100"></span>
+                    </div>
+                    <div class="space-y-12">
+                        <p class="font-arabic text-right leading-[2.2]" dir="rtl">${h.hadithArabic}</p>
+                        <div class="relative">
+                            <i class="fa-solid fa-quote-right absolute -top-4 -right-2 text-emerald-50 text-6xl"></i>
+                            <p class="font-urdu text-slate-700 relative z-10 text-right" dir="rtl">${h.hadithUrdu}</p>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            document.getElementById('reading-zone').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleDrawer() {
+            document.getElementById('chapter-side').classList.toggle('drawer-open');
+            document.getElementById('overlay').classList.toggle('hidden');
+        }
+
+        function goHome() {
+            document.getElementById('view-books').classList.remove('hidden');
+            document.getElementById('view-reader').classList.add('hidden');
+            document.getElementById('homeBtn').classList.add('hidden');
+        }
+
+        loadBooks();
+    </script>
+</body>
+</html>
