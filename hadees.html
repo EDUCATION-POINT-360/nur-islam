@@ -80,114 +80,125 @@
 
     <div id="overlay" onclick="toggleDrawer()" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[150]"></div>
 
-    <script>
-        const API_KEY = "$2y$10$VNFcNBFqqU9zDN3owkrHNGOFscM9f1rrB1u3ovmqmEmeCpRLf8IW";
-        // Using AllOrigins as it's the most reliable for GitHub Pages
-        const PROXY = "https://api.allorigins.win/raw?url=";
-        let activeSlug = "";
+   <script>
+    const API_KEY = "$2y$10$VNFcNBFqqU9zDN3owkrHNGOFscM9f1rrB1u3ovmqmEmeCpRLf8IW";
+    
+    // Updated Proxy Logic: Using the 'contents' endpoint is more stable for CORS
+    const PROXY = "https://api.allorigins.win/get?url=";
+    let activeSlug = "";
 
-        async function apiRequest(path) {
-            const url = `https://hadithapi.com/api/${path}${path.includes('?') ? '&' : '?'}apiKey=${API_KEY}`;
-            try {
-                const res = await fetch(PROXY + encodeURIComponent(url));
-                if (!res.ok) throw new Error("API call failed");
-                return await res.json();
-            } catch (err) {
-                console.error("Error:", err);
-                return null;
-            }
+    async function apiRequest(path) {
+        // We add a timestamp to bypass any 'cached' CORS errors
+        const timestamp = new Date().getTime();
+        const targetUrl = `https://hadithapi.com/api/${path}${path.includes('?') ? '&' : '?'}apiKey=${API_KEY}&t=${timestamp}`;
+        
+        try {
+            const res = await fetch(PROXY + encodeURIComponent(targetUrl));
+            if (!res.ok) throw new Error("Proxy connection failed");
+            
+            const wrapper = await res.json();
+            // AllOrigins returns the data inside a 'contents' string
+            return JSON.parse(wrapper.contents);
+        } catch (err) {
+            console.error("Fetch Error:", err);
+            return null;
+        }
+    }
+
+    async function loadBooks() {
+        const grid = document.getElementById('grid-books');
+        const data = await apiRequest('books');
+        
+        if (!data || !data.books) {
+            grid.innerHTML = `
+                <div class="col-span-full p-8 text-center bg-red-50 rounded-2xl">
+                    <p class="font-urdu text-red-600">سرور سے ڈیٹا حاصل نہیں ہو سکا</p>
+                    <button onclick="location.reload()" class="mt-4 text-xs bg-red-600 text-white px-4 py-2 rounded-lg">دوبارہ کوشش کریں</button>
+                </div>`;
+            return;
         }
 
-        async function loadBooks() {
-            const grid = document.getElementById('grid-books');
-            const data = await apiRequest('books');
-            if (!data || !data.books) {
-                grid.innerHTML = `<p class="col-span-full text-center font-urdu py-20 text-red-500">ڈیٹا لوڈ کرنے میں دشواری ہو رہی ہے۔ براہ کرم ریفریش کریں۔</p>`;
-                return;
-            }
+        grid.innerHTML = '';
+        data.books.forEach(book => {
+            const card = document.createElement('div');
+            card.className = "book-card p-6 rounded-3xl cursor-pointer text-right";
+            card.onclick = () => openReader(book.bookSlug, book.bookName);
+            card.innerHTML = `
+                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4 mr-auto ml-0">
+                    <i class="fa-solid fa-book"></i>
+                </div>
+                <h3 class="font-urdu text-xl text-slate-800 font-bold">${book.bookName}</h3>
+                <div class="mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">${book.hadiths_count} AHADITH</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
 
-            grid.innerHTML = '';
-            data.books.forEach(book => {
-                const card = document.createElement('div');
-                card.className = "book-card p-6 rounded-3xl cursor-pointer text-right";
-                card.onclick = () => openReader(book.bookSlug, book.bookName);
-                card.innerHTML = `
-                    <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4 mr-auto ml-0">
-                        <i class="fa-solid fa-book"></i>
-                    </div>
-                    <h3 class="font-urdu text-xl text-slate-800 font-bold">${book.bookName}</h3>
-                    <div class="mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">${book.hadiths_count} AHADITH</div>
-                `;
-                grid.appendChild(card);
-            });
-        }
+    async function openReader(slug, name) {
+        activeSlug = slug;
+        document.getElementById('view-books').classList.add('hidden');
+        document.getElementById('view-reader').classList.remove('hidden');
+        document.getElementById('homeBtn').classList.remove('hidden');
+        document.getElementById('book-title-sub').innerText = name;
 
-        async function openReader(slug, name) {
-            activeSlug = slug;
-            document.getElementById('view-books').classList.add('hidden');
-            document.getElementById('view-reader').classList.remove('hidden');
-            document.getElementById('homeBtn').classList.remove('hidden');
-            document.getElementById('book-title-sub').innerText = name;
+        const chapBox = document.getElementById('list-chapters');
+        chapBox.innerHTML = '<div class="py-10 text-center"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i></div>';
 
-            const chapBox = document.getElementById('list-chapters');
-            chapBox.innerHTML = '<div class="py-10 text-center"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i></div>';
+        const data = await apiRequest(`${slug}/chapters`);
+        if (!data || !data.chapters) return;
 
-            const data = await apiRequest(`${slug}/chapters`);
-            if (!data) return;
+        chapBox.innerHTML = '';
+        data.chapters.forEach(ch => {
+            const btn = document.createElement('div');
+            btn.className = "p-4 rounded-xl cursor-pointer text-right font-urdu text-sm hover:bg-emerald-50 transition-all ch-item";
+            btn.innerHTML = ch.chapterUrdu;
+            btn.onclick = () => {
+                document.querySelectorAll('.ch-item').forEach(el => el.classList.remove('active-ch'));
+                btn.classList.add('active-ch');
+                loadHadiths(ch.chapterNumber);
+                if (window.innerWidth < 768) toggleDrawer();
+            };
+            chapBox.appendChild(btn);
+        });
+    }
 
-            chapBox.innerHTML = '';
-            data.chapters.forEach(ch => {
-                const btn = document.createElement('div');
-                btn.className = "p-4 rounded-xl cursor-pointer text-right font-urdu text-sm hover:bg-emerald-50 transition-all ch-item";
-                btn.innerHTML = ch.chapterUrdu;
-                btn.onclick = () => {
-                    document.querySelectorAll('.ch-item').forEach(el => el.classList.remove('active-ch'));
-                    btn.classList.add('active-ch');
-                    loadHadiths(ch.chapterNumber);
-                    if (window.innerWidth < 768) toggleDrawer();
-                };
-                chapBox.appendChild(btn);
-            });
-        }
+    async function loadHadiths(id) {
+        const list = document.getElementById('list-hadiths');
+        document.getElementById('placeholder').classList.add('hidden');
+        list.innerHTML = '<div class="py-20 text-center"><i class="fa-solid fa-sun fa-spin text-emerald-500 text-3xl"></i></div>';
 
-        async function loadHadiths(id) {
-            const list = document.getElementById('list-hadiths');
-            document.getElementById('placeholder').classList.add('hidden');
-            list.innerHTML = '<div class="py-20 text-center"><i class="fa-solid fa-sun fa-spin text-emerald-500 text-3xl"></i></div>';
+        const data = await apiRequest(`hadiths?book=${activeSlug}&chapter=${id}&paginate=50`);
+        if (!data || !data.hadiths) return;
 
-            const data = await apiRequest(`hadiths?book=${activeSlug}&chapter=${id}&paginate=50`);
-            if (!data || !data.hadiths) return;
+        list.innerHTML = '';
+        data.hadiths.data.forEach(h => {
+            const card = document.createElement('article');
+            card.className = "space-y-8";
+            card.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <span class="text-[10px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">HADITH ${h.hadithNumber}</span>
+                    <div class="h-px bg-slate-100 flex-1"></div>
+                </div>
+                <p class="font-arabic text-right leading-loose" dir="rtl">${h.hadithArabic}</p>
+                <p class="font-urdu text-slate-600 text-right leading-relaxed" dir="rtl">${h.hadithUrdu}</p>
+            `;
+            list.appendChild(card);
+        });
+        document.getElementById('reading-zone').scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-            list.innerHTML = '';
-            data.hadiths.data.forEach(h => {
-                const card = document.createElement('article');
-                card.className = "space-y-8";
-                card.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <span class="text-[10px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">HADITH ${h.hadithNumber}</span>
-                        <div class="h-px bg-slate-100 flex-1"></div>
-                    </div>
-                    <p class="font-arabic text-right leading-loose" dir="rtl">${h.hadithArabic}</p>
-                    <p class="font-urdu text-slate-600 text-right leading-relaxed" dir="rtl">${h.hadithUrdu}</p>
-                `;
-                list.appendChild(card);
-            });
-            document.getElementById('reading-zone').scrollTo({ top: 0, behavior: 'smooth' });
-        }
+    function toggleDrawer() {
+        document.getElementById('chapter-side').classList.toggle('drawer-open');
+        document.getElementById('overlay').classList.toggle('hidden');
+    }
 
-        function toggleDrawer() {
-            document.getElementById('chapter-side').classList.toggle('drawer-open');
-            document.getElementById('overlay').classList.toggle('hidden');
-        }
+    function goHome() {
+        document.getElementById('view-books').classList.remove('hidden');
+        document.getElementById('view-reader').classList.add('hidden');
+        document.getElementById('homeBtn').classList.add('hidden');
+    }
 
-        function goHome() {
-            document.getElementById('view-books').classList.remove('hidden');
-            document.getElementById('view-reader').classList.add('hidden');
-            document.getElementById('homeBtn').classList.add('hidden');
-        }
-
-        // Start
-        loadBooks();
-    </script>
+    loadBooks();
+</script>
 </body>
 </html>
