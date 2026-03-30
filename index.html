@@ -277,6 +277,108 @@
         </div>
 
     </div>
+	<div class="fixed right-6 bottom-6 z-[9999] flex flex-col items-end gap-3" id="menu-container">
+    
+    <div id="menu-items" class="flex flex-col gap-3 pointer-events-none opacity-0 translate-y-12 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+        
+        <div class="relative group">
+            <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+            <a href="https://edupointai.netlify.app" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
+                <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
+                    <span class="block text-[7px] uppercase tracking-[0.2em] text-blue-400 font-black">AI System</span>
+                    <span class="text-sm font-bold text-white">EduPoint <span class="text-blue-500">AI</span></span>
+                </div>
+                <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-blue-600 transition-all duration-300">
+                    <i class="fa-solid fa-microchip text-blue-500 group-hover:text-black text-base"></i>
+                </div>
+            </a>
+        </div>
+
+        <div class="relative group">
+            <div class="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-400 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+            <a href="https://nurislamic.netlify.app" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
+                <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
+                    <span class="block text-[7px] uppercase tracking-[0.2em] text-emerald-400 font-black">Spiritual</span>
+                    <span class="text-sm font-bold text-white">Nur <span class="text-emerald-500">Islam</span></span>
+                </div>
+                <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-emerald-500 transition-all duration-300">
+                    <i class="fa-solid fa-kaaba text-emerald-500 group-hover:text-black text-base"></i>
+                </div>
+            </a>
+        </div>
+
+        <div class="relative group">
+            <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+            <a href="https://rizwanep.netlify.app/" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
+                <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
+                    <span class="block text-[7px] uppercase tracking-[0.2em] text-purple-400 font-black">Developer</span>
+                    <span class="text-sm font-bold text-white">M. <span class="text-purple-500">Rizwan</span></span>
+                </div>
+                <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-purple-600 transition-all duration-300">
+                    <i class="fa-solid fa-user-tie text-purple-500 group-hover:text-black text-base"></i>
+                </div>
+            </a>
+        </div>
+
+        <div class="relative group">
+            <div class="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+            <a href="https://educationpoint360.netlify.app/" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
+                <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
+                    <span class="block text-[7px] uppercase tracking-[0.2em] text-amber-400 font-black">Learning Hub</span>
+                    <span class="text-sm font-bold text-white">EduPoint <span class="text-amber-500">360</span></span>
+                </div>
+                <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-amber-500 transition-all duration-300">
+                    <i class="fa-solid fa-graduation-cap text-amber-500 group-hover:text-black text-base"></i>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <button onclick="toggleMenu()" id="menu-trigger" class="relative group flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-black shadow-2xl transition-all duration-500 active:scale-90">
+        <div class="absolute -inset-1 bg-white/30 rounded-2xl blur-md group-hover:opacity-100 opacity-0 transition-opacity"></div>
+        <i id="menu-icon" class="fa-solid fa-plus text-xl transition-transform duration-500"></i>
+    </button>
+
+</div>
+
+<style>
+    /* Toggle States */
+    .menu-open #menu-items {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+        pointer-events: auto !important;
+    }
+    
+    .menu-open #menu-icon {
+        transform: rotate(135deg);
+    }
+
+    /* Apple Staggered Animation (Bottom to Top) */
+    #menu-items > div:nth-child(4) { transition-delay: 0.05s; }
+    #menu-items > div:nth-child(3) { transition-delay: 0.1s; }
+    #menu-items > div:nth-child(2) { transition-delay: 0.15s; }
+    #menu-items > div:nth-child(1) { transition-delay: 0.2s; }
+</style>
+
+<script>
+    function toggleMenu() {
+        const container = document.getElementById('menu-container');
+        container.classList.toggle('menu-open');
+    }
+    
+    // Optional: Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        const container = document.getElementById('menu-container');
+        if (!container.contains(e.target) && container.classList.contains('menu-open')) {
+            container.classList.remove('menu-open');
+        }
+    });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+	
 </section>
 	    <footer class="bg-slate-900 pt-24 pb-12 px-8 overflow-hidden relative">
         <div class="max-w-7xl mx-auto relative z-10 text-center md:text-left">
