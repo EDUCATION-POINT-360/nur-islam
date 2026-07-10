@@ -177,6 +177,8 @@
 
     async function loadHadiths(id) {
         const currentBookName = document.getElementById('book-title-sub')?.innerText || "Hadith Book";
+        
+        // سنٹرل رئیل ٹائم اینالیٹکس کو ڈیٹا فراہم کرنا
         if (window.NurCore && typeof window.NurCore.saveHadithProgress === 'function') {
             window.NurCore.saveHadithProgress(activeSlug, currentBookName, id);
         }
