@@ -39,7 +39,49 @@
     </style>
 </head>
 <body class="antialiased">
+<!-- Drop this UI block into your interface code to handle client sessions -->
+<div id="nur-auth-widget" class="p-4 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/10 max-w-sm mx-auto mt-6">
+    <div id="auth-logged-out" class="space-y-3">
+        <p class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Cloud Sync Profile</p>
+        <input type="email" id="auth-email" placeholder="Email Address" class="w-full text-xs p-2.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-emerald-500">
+        <input type="password" id="auth-pass" placeholder="Password" class="w-full text-xs p-2.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-emerald-500">
+        <button onclick="handleCoreLogin()" class="w-full py-2 bg-emerald-500 text-black font-bold text-xs rounded-lg shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition">
+            Sign In / Sync Data
+        </button>
+    </div>
+    <div id="auth-logged-in" class="hidden flex justify-between items-center">
+        <div>
+            <p class="text-[10px] font-bold text-emerald-400 tracking-widest uppercase">CONNECTED PROFILE</p>
+            <h4 id="auth-user-name" class="text-sm font-bold text-white">Seeker</h4>
+        </div>
+        <button onclick="window.NurCore.triggerLogout()" class="px-3 py-1.5 border border-red-500/30 text-red-400 text-[11px] font-bold rounded-lg bg-red-500/10 hover:bg-red-500 hover:text-white transition">
+            Disconnect
+        </button>
+    </div>
+</div>
 
+<script>
+    async function handleCoreLogin() {
+        const email = document.getElementById('auth-email').value;
+        const pass = document.getElementById('auth-pass').value;
+        const { error } = await window.NurCore.triggerLogin(email, pass);
+        if (error) alert("Authentication Encountered an Error: " + error.message);
+    }
+
+    // Monitor engine actions to shift layouts smoothly
+    window.addEventListener('nurStateSync', () => {
+        const user = window.NurCore.getSnapshot().user;
+        if (user.authenticated) {
+            document.getElementById('auth-logged-out').classList.add('hidden');
+            document.getElementById('auth-logged-in').classList.remove('hidden');
+            document.getElementById('auth-user-name').innerText = user.name;
+        } else {
+            document.getElementById('auth-logged-out').classList.remove('hidden');
+            document.getElementById('auth-logged-in').classList.add('hidden');
+        }
+    });
+</script>
+	
     <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-[100] glass rounded-3xl border border-white/20 px-6 py-4 flex justify-between items-center shadow-2xl">
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-emerald-400"><i class="fa-solid fa-bolt-lightning"></i></div>
