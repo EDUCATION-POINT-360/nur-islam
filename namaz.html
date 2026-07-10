@@ -7,9 +7,9 @@
     <script src="nur-core.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="icon" href="logo.png" type="image/png" />
+    <link class="icon" href="logo.png" type="image/png" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;600;800&display=swap');
         
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -193,6 +193,21 @@
     <audio id="adhan-audio" src="https://www.islamcan.com/audio/adhan/makkah.mp3"></audio>
 
     <script>
+        // اس کوڈ کو اپنے موجودہ loadSurah فنکشن میں اپڈیٹ کریں
+        async function loadSurah(id, name) {
+            localStorage.setItem('lastReadId', id);
+            localStorage.setItem('lastReadName', name);
+            
+            // کلاؤڈ اور سنٹرل انجن میں میٹرکس محفوظ کرنا
+            if (window.NurCore && typeof window.NurCore.saveSurahProgress === 'function') {
+                // ہم نے ڈیفالٹ 1 آیت کا اضافہ ٹریک کر لیا ہے، مکمل ہونے پر لائیو سنک ہوگا
+                window.NurCore.saveSurahProgress(id, name, 1); 
+            }
+            checkLastRead();
+
+            // باقی موجودہ UI اور API رینڈرنگ لاجک بالکل ویسے ہی رہے گا...
+        }
+
         const pData = [
             { id: 'Fajr', icon: 'sunrise', sun: 2, farz: 2, witr: 0, nafl: 0, total: 4 },
             { id: 'Dhuhr', icon: 'sun', sun: 6, farz: 4, witr: 0, nafl: 2, total: 12 },
