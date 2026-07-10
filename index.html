@@ -61,6 +61,12 @@
                     const data = await res.json();
                     if (data && data.data && data.data.timings) {
                         const timings = data.data.timings;
+                        
+                        // Pass live daily timetable to NurCore Audio Engine for cross-tab adhan syncing
+                        if (window.NurCore && typeof window.NurCore.initializeAlarms === 'function') {
+                            window.NurCore.initializeAlarms(timings);
+                        }
+
                         const prayersToCheck = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
                         setInterval(async () => {
                             const now = new Date();
@@ -350,11 +356,6 @@
     </div>
 
     <script>
-        // Supabase Initialization Configuration
-        const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL"; 
-        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
         let gatewayMode = 'login'; // Modes: 'login' or 'signup'
 
         function switchGatewayMode() {
@@ -378,11 +379,10 @@
             }
         }
 
-        // رئیل ٹائم سائن اپ اور لاگ ان پروسیس میکر
+        // رئیل ٹائم سائن اپ اور لاگ ان پروسیس میکر (Linked with global NurCore Engine)
         async function executeGatewayAuth() {
-            if (!supabase) {
-                alert("Supabase integration requires configuration tokens.");
-                unlockAppInterface("Off-Grid User"); 
+            if (!window.NurCore) {
+                alert("NUR Core Infrastructure layer is loading, please retry in a second.");
                 return;
             }
 
@@ -397,8 +397,7 @@
             document.getElementById('gate-main-btn').innerText = "Synchronizing Buffer...";
 
             if (gatewayMode === 'login') {
-                // Realtime Supabase Sign In
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                const { data, error } = await window.NurCore.triggerLogin(email, password);
                 if (error) {
                     alert(`Access Denied: ${error.message}`);
                     document.getElementById('gate-main-btn').innerText = "Access Realtime Platform";
@@ -406,8 +405,7 @@
                     unlockAppInterface(data.user.email);
                 }
             } else {
-                // Realtime Supabase Sign Up
-                const { data, error } = await supabase.auth.signUp({ email, password });
+                const { data, error } = await window.NurCore.triggerSignUp(email, password);
                 if (error) {
                     alert(`Registration Failed: ${error.message}`);
                     document.getElementById('gate-main-btn').innerText = "Register Fresh Node";
@@ -434,12 +432,73 @@
                 // Fire realtime engines right away
                 initRealtimeNotificationSystem();
                 fetchLiveLocationData();
+                bindCoreStateToDashboard();
             }, 100);
         }
 
         function terminateSession() {
-            if(supabase) supabase.auth.signOut();
-            window.location.reload();
+            if (window.NurCore) {
+                window.NurCore.triggerLogout();
+            } else {
+                window.location.reload();
+            }
+        }
+
+        // Connect the real-time NurCore state variables with UI elements smoothly
+        function updateDashboardUI(state) {
+            if (!state) return;
+            
+            // 1. Quran Metrics
+            const quranAyahsEl = document.getElementById('db-quran-ayahs');
+            if (quranAyahsEl) quranAyahsEl.innerHTML = `${state.readingHistory.totalAyahsRead} <span class="text-xs text-slate-400 font-medium">Ayahs</span>`;
+            
+            const lastSurahEl = document.getElementById('db-last-surah');
+            if (lastSurahEl) lastSurahEl.innerText = state.readingHistory.lastSurahName ? `آخری بار پڑھا گیا: ${state.readingHistory.lastSurahName}` : 'کوئی ہسٹری نہیں ہے';
+
+            // 2. Hadith Metrics
+            const hadithCountEl = document.getElementById('db-hadith-count');
+            if (hadithCountEl) hadithCountEl.innerHTML = `${state.hadithState.totalHadithRead} <span class="text-xs text-slate-400 font-medium">Read</span>`;
+            
+            const lastHadithEl = document.getElementById('db-last-hadith');
+            if (lastHadithEl) lastHadithEl.innerText = state.hadithState.lastBookName ? `کتاب: ${state.hadithState.lastBookName}` : 'مطالعہ شروع کریں';
+
+            // 3. Tasbeeh & Usage Metrics
+            const tasbeehTotalEl = document.getElementById('db-tasbeeh-total');
+            if (tasbeehTotalEl) tasbeehTotalEl.innerText = state.tasbeehAnalytics.totalCounts;
+            
+            const tasbeehGoalsEl = document.getElementById('db-tasbeeh-goals');
+            if (tasbeehGoalsEl) tasbeehGoalsEl.innerText = `${state.tasbeehAnalytics.dailyGoalsCompleted} Goals Met`;
+
+            const timeSpentEl = document.getElementById('db-time-spent');
+            if (timeSpentEl) timeSpentEl.innerText = state.appUsage.totalTimeSpent;
+
+            // 4. Prayer Log System Status Map
+            const todayStr = new Date().toDateString();
+            const todayPrayers = state.prayerHistory[todayStr] || { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
+            const completedCount = Object.values(todayPrayers).filter(Boolean).length;
+            
+            const prayersCountEl = document.getElementById('db-prayers-count');
+            if (prayersCountEl) prayersCountEl.innerText = `${completedCount} / 5`;
+
+            const dotsContainer = document.getElementById('db-prayer-dots');
+            if (dotsContainer) {
+                dotsContainer.innerHTML = '';
+                ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].forEach(p => {
+                    const dot = document.createElement('span');
+                    dot.className = `w-2.5 h-2.5 rounded-full shadow-sm transition-all ${todayPrayers[p] ? 'bg-blue-500' : 'bg-slate-300'}`;
+                    dotsContainer.appendChild(dot);
+                });
+            }
+        }
+
+        function bindCoreStateToDashboard() {
+            if (!window.NurCore) return;
+            // Initial render
+            updateDashboardUI(window.NurCore.getSnapshot());
+            // Realtime Event Pipeline subscription loop
+            window.addEventListener('nurStateSync', (e) => {
+                updateDashboardUI(e.detail);
+            });
         }
 
         // Core UI Engine Bindings
@@ -458,6 +517,13 @@
             const clock = document.getElementById('clock');
             if(clock) clock.innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
         }, 1000);
+
+        // Tracker interval to record active engagement into state storage engine
+        setInterval(() => {
+            if (window.NurCore && window.NurCore.getSnapshot().user.authenticated) {
+                window.NurCore.trackTime(1);
+            }
+        }, 60000);
 
         async function fetchLiveLocationData() {
             if (navigator.geolocation) {
@@ -491,15 +557,28 @@
             document.getElementById('menu-container').classList.toggle('menu-open');
         }
 
-        // Check active login instance on page launch
-        window.addEventListener('load', async () => {
-            if (supabase) {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    unlockAppInterface(session.user.email);
+        // Initialize state verification on page load using NurCore state management layer
+        const checkSessionInterval = setInterval(() => {
+            if (window.NurCore) {
+                clearInterval(checkSessionInterval);
+                // Listen to hardware gestures to clear browser audio boundaries right away
+                window.addEventListener('click', () => { window.NurCore.unlockAudio(); }, { once: true });
+                
+                const snapshot = window.NurCore.getSnapshot();
+                if (snapshot && snapshot.user && snapshot.user.authenticated) {
+                    // Check local storage configuration to determine actual profile data
+                    const legacyStateStr = localStorage.getItem('nur_global_state');
+                    if (legacyStateStr) {
+                        try {
+                            const parsed = JSON.parse(legacyStateStr);
+                            if (parsed.user && parsed.user.id !== "guest_seeker") {
+                                unlockAppInterface(parsed.user.name || "Faith Seeker");
+                            }
+                        } catch(e) {}
+                    }
                 }
             }
-        });
+        }, 50);
     </script>
 </body>
 </html>
