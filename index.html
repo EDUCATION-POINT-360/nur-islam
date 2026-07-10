@@ -5,12 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NUR | The Digital Light</title>
     <script src="https://cdn.tailwindcss.com"></script>
-	<script src="nur-core.js"></script>
-	 <link rel="icon" href="logo.png" type="image/png" />
-	<link rel="manifest" href="manifest.json">
-	
+    <script src="nur-core.js"></script>
+    <link rel="icon" href="logo.png" type="image/png" />
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <!-- PWA Core Registration & Lifecycle Manager -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('[NUR PWA] Service Worker securely registered under scope:', registration.scope);
+
+                        // Detect immediate worker script updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[NUR PWA] New core engine updates are available. Refreshing cache seamlessly.');
+                                    // Optional: Trigger a clean hot reload to serve fresh cache states immediately
+                                    window.location.reload();
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('[NUR PWA] Service Worker registration stalled:', error);
+                    });
+            });
+        }
+
+        // Network Status Lifecycle Listeners
+        window.addEventListener('online', () => {
+            console.log('[NUR PWA] Live network stream restored. Synchronizing background buffers.');
+            document.documentElement.classList.remove('offline-mode');
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('[NUR PWA] Offline buffer active. Preserving application structural states.');
+            document.documentElement.classList.add('offline-mode');
+        });
+    </script>
+</head>
+	
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Amiri:wght@400;700&family=Playfair+Display:ital,wght@0,900;1,900&display=swap');
         
