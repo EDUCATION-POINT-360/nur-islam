@@ -92,3 +92,82 @@ self.addEventListener('fetch', (e) => {
         );
     }
 });
+
+
+// لائیو نوٹیفیکیشنز اور الارم ہینڈلر
+self.addEventListener('push', (event) => {
+    let data = { title: 'NUR Islamic Platform', body: 'روزانہ کی برکات حاصل کریں!' };
+    if (event.data) {
+        try { data = event.data.json(); } catch(e) { data.body = event.data.text(); }
+    }
+
+    const options = {
+        body: data.body,
+        icon: './logo.png',
+        badge: './logo.png',
+        vibrate: [200, 100, 200],
+        data: { url: data.url || './index.html' }
+    };
+
+    event.waitUntil(self.registration.showNotification(data.title, options));
+});
+
+// نوٹیفیکیشن پر کلک کرنے سے ایپ کھولنے کا لاجک
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
+        clients.matchAll({ type: 'window' }).then((clientList) => {
+            for (const client of clientList) {
+                if (client.url === event.notification.data.url && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) { return clients.openWindow(event.notification.data.url); }
+        })
+    );
+});
+
+// آٹو الارم شیڈولر (بیک گراؤنڈ میں رئیل ٹائم ڈیٹا فیچنگ لاجک)
+self.addEventListener('periodicsync', (event) => {
+    if (event.tag === 'daily-islamic-feed') {
+        event.waitUntil(sendDailyLocalNotification());
+    }
+});
+
+async function sendDailyLocalNotification() {
+    let title = "✨ آیتِ مبارکہ";
+    let message = "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا - بے شک مشکل کے ساتھ آسانی ہے۔";
+    
+    // رینڈم طریقے سے طے کریں کہ اس بار آیت دکھانی ہے یا حدیث
+    const showHadith = Math.random() > 0.5;
+
+    try {
+        if (showHadith) {
+            // رئیل ٹائم اوپن سورس حدیث API سے ڈیٹا فیچ کرنا
+            const res = await fetch('https://api.sunnah.com/v1/hadiths/random', {
+                headers: { 'X-API-Key': 'YOUR_SUNNAH_API_KEY_IF_NEEDED' } 
+            });
+            const data = await res.json();
+            title = "📖 آج کی حدیث";
+            message = data.hadith[0].body || message;
+        } else {
+            // رئیل ٹائم القرطاس/القرآن API سے رینڈم یا یومیہ آیت فیچ کرنا
+            const randomAyah = Math.floor(Math.random() * 6236) + 1;
+            const res = await fetch(`https://api.alquran.cloud/v1/ayah/${randomAyah}/editions/quran-simple,ur.jandagarhi`);
+            const data = await res.json();
+            if (data && data.data) {
+                title = `✨ آیتِ مبارکہ (${data.data[0].surah.englishName}: ${data.data[0].numberInSurah})`;
+                message = `${data.data[0].text}\n\nترجمہ: ${data.data[1].text}`;
+            }
+        }
+    } catch (err) {
+        console.log("[NUR SW Sync] API fetch deferred, using localized fallback core metrics.", err);
+    }
+
+    await self.registration.showNotification(title, {
+        body: message,
+        icon: './logo.png',
+        badge: './logo.png',
+        data: { url: showHadith ? './hadees.html' : './quran.html' }
+    });
+}
