@@ -3,7 +3,7 @@
  * Media Storage Assets Optimization & Hybrid Core Network Interceptor
  */
 
-const CACHE_NAME = 'nur-v2-static-and-media';
+const CACHE_NAME = 'nur-v3-islamic-os-cache';
 
 const ASSETS_TO_CACHE = [
     './index.html',
@@ -19,7 +19,8 @@ const ASSETS_TO_CACHE = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
     // Cache standard high-fidelity audio streams for offline access
     'https://www.islamcan.com/audio/adhan/azan1.mp3',
-    'https://www.islamcan.com/audio/adhan/azan2.mp3'
+    'https://www.islamcan.com/audio/adhan/azan2.mp3',
+    'https://www.islamcan.com/audio/adhan/makkah.mp3'
 ];
 
 self.addEventListener('install', (e) => {
@@ -65,13 +66,13 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // Dynamic APIs utilize Network-First execution
+    // Dynamic APIs utilize Network-First execution with Cache Fallback
     if (url.origin !== self.location.origin && !url.href.includes('cdnjs') && !url.href.includes('tailwindcss')) {
         e.respondWith(
             fetch(e.request)
                 .then((response) => {
                     const resClone = response.clone();
-                    caches.open('nur-dynamic-data').then((cache) => cache.put(e.request, resClone));
+                    caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
                     return response;
                 })
                 .catch(() => caches.match(e.request))
