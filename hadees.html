@@ -83,13 +83,10 @@
 
    <script>
     const API_KEY = "$2y$10$VNFcNBFqqU9zDN3owkrHNGOFscM9f1rrB1u3ovmqmEmeCpRLf8IW";
-    
-    // Updated Proxy Logic: Using the 'contents' endpoint is more stable for CORS
     const PROXY = "https://api.allorigins.win/get?url=";
     let activeSlug = "";
 
     async function apiRequest(path) {
-        // We add a timestamp to bypass any 'cached' CORS errors
         const timestamp = new Date().getTime();
         const targetUrl = `https://hadithapi.com/api/${path}${path.includes('?') ? '&' : '?'}apiKey=${API_KEY}&t=${timestamp}`;
         
@@ -98,7 +95,6 @@
             if (!res.ok) throw new Error("Proxy connection failed");
             
             const wrapper = await res.json();
-            // AllOrigins returns the data inside a 'contents' string
             return JSON.parse(wrapper.contents);
         } catch (err) {
             console.error("Fetch Error:", err);
@@ -164,15 +160,14 @@
     }
 
     async function loadHadiths(id) {
-    // Commit the active location to the shared state
-    const currentBookName = document.getElementById('book-title-sub')?.innerText || "Hadith Book";[span_15](start_span)[span_15](end_span)
-    window.NurCore.saveHadithProgress(activeSlug, currentBookName, id);[span_16](start_span)[span_16](end_span)
+        const currentBookName = document.getElementById('book-title-sub')?.innerText || "Hadith Book";
+        if (window.NurCore && typeof window.NurCore.saveHadithProgress === 'function') {
+            window.NurCore.saveHadithProgress(activeSlug, currentBookName, id);
+        }
 
-    const list = document.getElementById('list-hadiths');[span_17](start_span)[span_17](end_span)
-    document.getElementById('placeholder').classList.add('hidden');[span_18](start_span)[span_18](end_span)
-    list.innerHTML = '<div class="py-20 text-center"><i class="fa-solid fa-sun fa-spin text-emerald-500 text-3xl"></i></div>';[span_19](start_span)[span_19](end_span)
-
-    // ... Rest of your code continues unchanged[span_20](start_span)[span_20](end_span)
+        const list = document.getElementById('list-hadiths');
+        document.getElementById('placeholder').classList.add('hidden');
+        list.innerHTML = '<div class="py-20 text-center"><i class="fa-solid fa-sun fa-spin text-emerald-500 text-3xl"></i></div>';
                               
         const data = await apiRequest(`hadiths?book=${activeSlug}&chapter=${id}&paginate=50`);
         if (!data || !data.hadiths) return;
