@@ -1,5 +1,5 @@
 /**
- * NUR ISLAMIC PLATFORM - GLOBAL STATE & SUPABASE SYNC ENGINE (FINAL PRODUCTION)
+ * NUR ISLAMIC PLATFORM - GLOBAL STATE, SUPABASE & REALTIME SYNC ENGINE (FINAL PRODUCTION)
  * Centralized State Machine for Synchronization, Multi-Tab Harmony & Offline Consistency
  */
 
@@ -17,6 +17,7 @@ window.NurCore = (function () {
     const SUPABASE_URL = "https://njcnfxzwuzmfywvrdgub.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_Wd5JwhQnUL8fV8-wqGjrxw_5U0Oe3YQ";
     let supabaseClient = null;
+    let realtimeChannel = null; // Holds the active real-time WebSocket stream
 
     // Unified Data Structure Schema
     const DEFAULT_STATE = {
@@ -68,10 +69,10 @@ window.NurCore = (function () {
     }, 100);
 
     // Central Persistence, Cross-Tab Broadcaster, and Cloud Sync Engine
-    function saveState() {
+    function saveState(skipCloudPush = false) {
         localStorage.setItem(STATE_KEY, JSON.stringify(globalState));
         window.dispatchEvent(new CustomEvent('nurStateSync', { detail: globalState }));
-        pushToCloud();
+        if (!skipCloudPush) pushToCloud();
     }
 
     // Listen for cross-tab updates from other open browser instances
@@ -93,9 +94,9 @@ window.NurCore = (function () {
                 user_id: uid,
                 last_surah_id: globalState.readingHistory.lastSurahId,
                 last_surah_name: globalState.readingHistory.lastSurahName,
-                last_book_slug: globalState.readingHistory.hadithState.lastBookSlug,
-                last_book_name: globalState.readingHistory.hadithState.lastBookName,
-                last_chapter_id: globalState.readingHistory.hadithState.lastChapterId,
+                last_book_slug: globalState.hadithState.lastBookSlug,
+                last_book_name: globalState.hadithState.lastBookName,
+                last_chapter_id: globalState.hadithState.lastChapterId,
                 updated_at: new Date().toISOString()
             });
 
@@ -126,10 +127,12 @@ window.NurCore = (function () {
                     activeProfile: "Cloud"
                 };
                 await pullFromCloud();
+                initializeRealtimeSync(session.user.id); // Start live stream listener
             } else {
                 globalState.user = { id: "guest_seeker", name: "Guest User", authenticated: false, activeProfile: "Local" };
+                unsubscribeRealtime(); // Disconnect listener when logging out
             }
-            saveState();
+            saveState(true);
         });
     }
 
@@ -144,7 +147,11 @@ window.NurCore = (function () {
                 globalState.readingHistory = {
                     lastSurahId: readData.last_surah_id, 
                     lastSurahName: readData.last_surah_name,
-                    timestamp: readData.updated_at
+                    timestamp: readData.updated_at,
+                    // Map incoming realtime packet fallbacks safely
+                    lastBookSlug: readData.last_book_slug || "",
+                    lastBookName: readData.last_book_name || "",
+                    lastChapterId: readData.last_chapter_id || null
                 };
                 globalState.hadithState = {
                     lastBookSlug: readData.last_book_slug || "",
@@ -152,9 +159,62 @@ window.NurCore = (function () {
                     lastChapterId: readData.last_chapter_id || null
                 };
             }
+
+            const { data: prayerData } = await supabaseClient.from('prayer_history').select('*').eq('user_id', uid);
+            if (prayerData) {
+                prayerData.forEach(row => {
+                    globalState.prayerHistory[row.date_string] = {
+                        Fajr: row.fajr, Dhuhr: row.dhuhr, Asr: row.asr, Maghrib: row.maghrib, Isha: row.isha
+                    };
+                });
+            }
             localStorage.setItem(STATE_KEY, JSON.stringify(globalState));
         } catch (err) {
             console.error("Cloud pull processing deferred:", err);
+        }
+    }
+
+    // 📡 LIVE WEB-SOCKET REPLICATION STREAM CONTROLLER
+    function initializeRealtimeSync(userId) {
+        if (realtimeChannel) unsubscribeRealtime();
+
+        realtimeChannel = supabaseClient
+            .channel(`public-sync-room:${userId}`)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'reading_history', filter: `user_id=eq.${userId}` }, (payload) => {
+                if (payload.new) {
+                    globalState.readingHistory = {
+                        lastSurahId: payload.new.last_surah_id, 
+                        lastSurahName: payload.new.last_surah_name,
+                        lastBookSlug: payload.new.last_book_slug || "",
+                        lastBookName: payload.new.last_book_name || "",
+                        lastChapterId: payload.new.last_chapter_id || null,
+                        timestamp: payload.new.updated_at
+                    };
+                    globalState.hadithState = {
+                        lastBookSlug: payload.new.last_book_slug || "",
+                        lastBookName: payload.new.last_book_name || "",
+                        lastChapterId: payload.new.last_chapter_id || null
+                    };
+                    saveState(true); // Persist update locally and broadcast across tabs without pushing back up
+                }
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'prayer_history', filter: `user_id=eq.${userId}` }, (payload) => {
+                if (payload.new) {
+                    globalState.prayerHistory[payload.new.date_string] = {
+                        Fajr: payload.new.fajr, Dhuhr: payload.new.dhuhr, Asr: payload.new.asr, Maghrib: payload.new.maghrib, Isha: payload.new.isha
+                    };
+                    saveState(true);
+                }
+            })
+            .subscribe((status) => {
+                console.log(`[NUR Realtime] WebSocket pipeline network registration status: ${status}`);
+            });
+    }
+
+    function unsubscribeRealtime() {
+        if (realtimeChannel && supabaseClient) {
+            supabaseClient.removeChannel(realtimeChannel);
+            realtimeChannel = null;
         }
     }
 
@@ -169,6 +229,7 @@ window.NurCore = (function () {
             return await supabaseClient.auth.signInWithPassword({ email, password });
         },
         triggerLogout: async () => {
+            unsubscribeRealtime();
             if (!supabaseClient) return;
             await supabaseClient.auth.signOut();
             localStorage.clear();
@@ -190,6 +251,10 @@ window.NurCore = (function () {
         // Hadith State Tracking
         saveHadithProgress: (bookSlug, bookName, chapterId) => {
             globalState.hadithState = { lastBookSlug: bookSlug, lastBookName: bookName, lastChapterId: chapterId };
+            // Populate fallback properties for shared schema synchronization parity
+            globalState.readingHistory.lastBookSlug = bookSlug;
+            globalState.readingHistory.lastBookName = bookName;
+            globalState.readingHistory.lastChapterId = chapterId;
             saveState();
         },
 
