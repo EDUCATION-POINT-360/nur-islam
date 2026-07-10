@@ -62,17 +62,19 @@
                     if (data && data.data && data.data.timings) {
                         const timings = data.data.timings;
                         
-                        // Pass live daily timetable to NurCore Audio Engine for cross-tab adhan syncing
-                        if (window.NurCore && typeof window.NurCore.initializeAlarms === 'function') {
-                            window.NurCore.initializeAlarms(timings);
-                        }
+                        // Clean timings to HH:MM format and register alarms inside core engine
+                        const cleanTimings = {};
+                        ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].forEach(p => {
+                            if (timings[p]) cleanTimings[p] = timings[p].split(' ')[0];
+                        });
+                        if (window.NurCore) window.NurCore.initializeAlarms(cleanTimings);
 
                         const prayersToCheck = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
                         setInterval(async () => {
                             const now = new Date();
                             const currentLocalTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
                             prayersToCheck.forEach(async (prayer) => {
-                                if (timings[prayer] === currentLocalTime) {
+                                if (cleanTimings[prayer] === currentLocalTime) {
                                     const alarmKey = `alarm_triggered_${prayer}_${new Date().toDateString()}`;
                                     if (!localStorage.getItem(alarmKey)) {
                                         const reg = await navigator.serviceWorker.ready;
@@ -238,7 +240,7 @@
                             <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Quran Reading</p>
                             <h3 id="db-quran-ayahs" class="text-3xl font-black text-slate-800 mt-1">0 <span class="text-xs text-slate-400 font-medium">Ayahs</span></h3>
                         </div>
-                        <p id="db-last-surah" class="text-xs text-slate-500 mt-3 font-medium truncate">آخری بار پڑھا گیا: سورہ البقرہ</p>
+                        <p id="db-last-surah" class="text-xs text-slate-500 mt-3 font-medium truncate">آخری بار پڑھا گیا: لوڈ ہو رہا ہے...</p>
                     </div>
 
                     <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
@@ -248,14 +250,14 @@
                         </div>
                         <div class="mt-4">
                             <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Prayers Today</p>
-                            <h3 id="db-prayers-count" class="text-3xl font-black text-slate-800 mt-1">5 / 5</h3>
+                            <h3 id="db-prayers-count" class="text-3xl font-black text-slate-800 mt-1">0 / 5</h3>
                         </div>
                         <div id="db-prayer-dots" class="flex gap-2 mt-3">
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span>
+                            <span data-p="Fajr" class="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm"></span>
+                            <span data-p="Dhuhr" class="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm"></span>
+                            <span data-p="Asr" class="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm"></span>
+                            <span data-p="Maghrib" class="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm"></span>
+                            <span data-p="Isha" class="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm"></span>
                         </div>
                     </div>
 
@@ -265,21 +267,21 @@
                         </div>
                         <div class="mt-4">
                             <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Hadith Logged</p>
-                            <h3 id="db-hadith-count" class="text-3xl font-black text-slate-800 mt-1">12 <span class="text-xs text-slate-400 font-medium">Read</span></h3>
+                            <h3 id="db-hadith-count" class="text-3xl font-black text-slate-800 mt-1">0 <span class="text-xs text-slate-400 font-medium">Read</span></h3>
                         </div>
-                        <p id="db-last-hadith" class="text-xs text-slate-500 mt-3 font-medium truncate">کتاب: صحیح البخاری</p>
+                        <p id="db-last-hadith" class="text-xs text-slate-500 mt-3 font-medium truncate">کتاب: لوڈ ہو رہا ہے...</p>
                     </div>
 
                     <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
                         <div class="flex justify-between items-start">
                             <div class="w-10 h-10 bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-circle-dot"></i></div>
-                            <span id="db-tasbeeh-goals" class="bg-purple-100 text-purple-600 text-[10px] font-black px-3 py-1 rounded-full">3 Goals Met</span>
+                            <span id="db-tasbeeh-goals" class="bg-purple-100 text-purple-600 text-[10px] font-black px-3 py-1 rounded-full">0 Goals Met</span>
                         </div>
                         <div class="mt-4">
                             <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Total Dhikr</p>
-                            <h3 id="db-tasbeeh-total" class="text-3xl font-black text-slate-800 mt-1">333</h3>
+                            <h3 id="db-tasbeeh-total" class="text-3xl font-black text-slate-800 mt-1">0</h3>
                         </div>
-                        <p class="text-xs text-slate-500 mt-3 font-medium">ایپ ٹائم: <span id="db-time-spent">45</span> منٹ</p>
+                        <p class="text-xs text-slate-500 mt-3 font-medium">ایپ ٹائم: <span id="db-time-spent">0</span> منٹ</p>
                     </div>
                 </div>
             </section>
@@ -356,7 +358,7 @@
     </div>
 
     <script>
-        let gatewayMode = 'login'; // Modes: 'login' or 'signup'
+        let gatewayMode = 'login';
 
         function switchGatewayMode() {
             const mainBtn = document.getElementById('gate-main-btn');
@@ -379,10 +381,10 @@
             }
         }
 
-        // رئیل ٹائم سائن اپ اور لاگ ان پروسیس میکر (Linked with global NurCore Engine)
+        // رئیل ٹائم سائن اپ اور لاگ ان پروسیس میکر مع NUR Core انٹیگریشن
         async function executeGatewayAuth() {
             if (!window.NurCore) {
-                alert("NUR Core Infrastructure layer is loading, please retry in a second.");
+                alert("Core Framework integration engine is offline.");
                 return;
             }
 
@@ -402,7 +404,7 @@
                     alert(`Access Denied: ${error.message}`);
                     document.getElementById('gate-main-btn').innerText = "Access Realtime Platform";
                 } else {
-                    unlockAppInterface(data.user.email);
+                    unlockAppInterface(email);
                 }
             } else {
                 const { data, error } = await window.NurCore.triggerSignUp(email, password);
@@ -421,7 +423,6 @@
             document.getElementById('nav-user-badge').innerText = userEmail.toUpperCase();
             document.getElementById('nav-user-badge').classList.remove('hidden');
             
-            // Slide up the wall overlay smoothly
             const gate = document.getElementById('nur-gateway-gate');
             gate.style.transform = 'translateY(-100%)';
             
@@ -429,79 +430,58 @@
             mainApp.classList.remove('hidden');
             setTimeout(() => {
                 mainApp.style.opacity = '1';
-                // Fire realtime engines right away
                 initRealtimeNotificationSystem();
                 fetchLiveLocationData();
-                bindCoreStateToDashboard();
+                if (window.NurCore) window.NurCore.unlockAudio();
+                renderDashboardMetrics();
             }, 100);
         }
 
-        function terminateSession() {
-            if (window.NurCore) {
-                window.NurCore.triggerLogout();
-            } else {
-                window.location.reload();
-            }
-        }
+        // لائیو ڈیش بورڈ رینڈرنگ فنکشن (NUR Core Reactive Subscription)
+        function renderDashboardMetrics() {
+            if (!window.NurCore) return;
+            const state = window.NurCore.getSnapshot();
 
-        // Connect the real-time NurCore state variables with UI elements smoothly
-        function updateDashboardUI(state) {
-            if (!state) return;
-            
-            // 1. Quran Metrics
-            const quranAyahsEl = document.getElementById('db-quran-ayahs');
-            if (quranAyahsEl) quranAyahsEl.innerHTML = `${state.readingHistory.totalAyahsRead} <span class="text-xs text-slate-400 font-medium">Ayahs</span>`;
-            
-            const lastSurahEl = document.getElementById('db-last-surah');
-            if (lastSurahEl) lastSurahEl.innerText = state.readingHistory.lastSurahName ? `آخری بار پڑھا گیا: ${state.readingHistory.lastSurahName}` : 'کوئی ہسٹری نہیں ہے';
+            // 1. Quran Readings Update
+            document.getElementById('db-quran-ayahs').innerHTML = `${state.readingHistory.totalAyahsRead} <span class="text-xs text-slate-400 font-medium">Ayahs</span>`;
+            document.getElementById('db-last-surah').innerText = state.readingHistory.lastSurahName ? `آخری بار پڑھا گیا: ${state.readingHistory.lastSurahName}` : 'کوئی ہسٹری نہیں';
 
-            // 2. Hadith Metrics
-            const hadithCountEl = document.getElementById('db-hadith-count');
-            if (hadithCountEl) hadithCountEl.innerHTML = `${state.hadithState.totalHadithRead} <span class="text-xs text-slate-400 font-medium">Read</span>`;
-            
-            const lastHadithEl = document.getElementById('db-last-hadith');
-            if (lastHadithEl) lastHadithEl.innerText = state.hadithState.lastBookName ? `کتاب: ${state.hadithState.lastBookName}` : 'مطالعہ شروع کریں';
-
-            // 3. Tasbeeh & Usage Metrics
-            const tasbeehTotalEl = document.getElementById('db-tasbeeh-total');
-            if (tasbeehTotalEl) tasbeehTotalEl.innerText = state.tasbeehAnalytics.totalCounts;
-            
-            const tasbeehGoalsEl = document.getElementById('db-tasbeeh-goals');
-            if (tasbeehGoalsEl) tasbeehGoalsEl.innerText = `${state.tasbeehAnalytics.dailyGoalsCompleted} Goals Met`;
-
-            const timeSpentEl = document.getElementById('db-time-spent');
-            if (timeSpentEl) timeSpentEl.innerText = state.appUsage.totalTimeSpent;
-
-            // 4. Prayer Log System Status Map
+            // 2. Prayer Tracker Sync
             const todayStr = new Date().toDateString();
             const todayPrayers = state.prayerHistory[todayStr] || { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
-            const completedCount = Object.values(todayPrayers).filter(Boolean).length;
-            
-            const prayersCountEl = document.getElementById('db-prayers-count');
-            if (prayersCountEl) prayersCountEl.innerText = `${completedCount} / 5`;
-
-            const dotsContainer = document.getElementById('db-prayer-dots');
-            if (dotsContainer) {
-                dotsContainer.innerHTML = '';
-                ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].forEach(p => {
-                    const dot = document.createElement('span');
-                    dot.className = `w-2.5 h-2.5 rounded-full shadow-sm transition-all ${todayPrayers[p] ? 'bg-blue-500' : 'bg-slate-300'}`;
-                    dotsContainer.appendChild(dot);
-                });
-            }
-        }
-
-        function bindCoreStateToDashboard() {
-            if (!window.NurCore) return;
-            // Initial render
-            updateDashboardUI(window.NurCore.getSnapshot());
-            // Realtime Event Pipeline subscription loop
-            window.addEventListener('nurStateSync', (e) => {
-                updateDashboardUI(e.detail);
+            let doneCount = 0;
+            ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].forEach(p => {
+                const dot = document.querySelector(`[data-p="${p}"]`);
+                if (dot) {
+                    if (todayPrayers[p]) {
+                        dot.className = "w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm";
+                        doneCount++;
+                    } else {
+                        dot.className = "w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm";
+                    }
+                }
             });
+            document.getElementById('db-prayers-count').innerText = `${doneCount} / 5`;
+
+            // 3. Hadith Metrics
+            document.getElementById('db-hadith-count').innerHTML = `${state.hadithState.totalHadithRead} <span class="text-xs text-slate-400 font-medium">Read</span>`;
+            document.getElementById('db-last-hadith').innerText = state.hadithState.lastBookName ? `کتاب: ${state.hadithState.lastBookName}` : 'کوئی ہسٹری نہیں';
+
+            // 4. Tasbeeh & Time Counters
+            document.getElementById('db-tasbeeh-total').innerText = state.tasbeehAnalytics.totalCounts;
+            document.getElementById('db-tasbeeh-goals').innerText = `${state.tasbeehAnalytics.dailyGoalsCompleted} Goals Met`;
+            document.getElementById('db-time-spent').innerText = Math.round(state.appUsage.totalTimeSpent);
         }
 
-        // Core UI Engine Bindings
+        // Global Event Listener for cross-tab or background cloud database updates
+        window.addEventListener('nurStateSync', () => {
+            renderDashboardMetrics();
+        });
+
+        function terminateSession() {
+            if (window.NurCore) window.NurCore.triggerLogout();
+        }
+
         function toggleSidebar(open) {
             const side = document.getElementById('sidebar');
             if(open) {
@@ -516,14 +496,12 @@
         setInterval(() => {
             const clock = document.getElementById('clock');
             if(clock) clock.innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
-        }, 1000);
-
-        // Tracker interval to record active engagement into state storage engine
-        setInterval(() => {
-            if (window.NurCore && window.NurCore.getSnapshot().user.authenticated) {
-                window.NurCore.trackTime(1);
+            
+            // Periodically log time metrics to the state manager every 1 minute
+            if (window.NurCore && !document.getElementById('nur-main-application').classList.contains('hidden')) {
+                window.NurCore.trackTime(1 / 60); 
             }
-        }, 60000);
+        }, 1000);
 
         async function fetchLiveLocationData() {
             if (navigator.geolocation) {
@@ -557,28 +535,17 @@
             document.getElementById('menu-container').classList.toggle('menu-open');
         }
 
-        // Initialize state verification on page load using NurCore state management layer
-        const checkSessionInterval = setInterval(() => {
-            if (window.NurCore) {
-                clearInterval(checkSessionInterval);
-                // Listen to hardware gestures to clear browser audio boundaries right away
-                window.addEventListener('click', () => { window.NurCore.unlockAudio(); }, { once: true });
-                
-                const snapshot = window.NurCore.getSnapshot();
-                if (snapshot && snapshot.user && snapshot.user.authenticated) {
-                    // Check local storage configuration to determine actual profile data
-                    const legacyStateStr = localStorage.getItem('nur_global_state');
-                    if (legacyStateStr) {
-                        try {
-                            const parsed = JSON.parse(legacyStateStr);
-                            if (parsed.user && parsed.user.id !== "guest_seeker") {
-                                unlockAppInterface(parsed.user.name || "Faith Seeker");
-                            }
-                        } catch(e) {}
+        // Automatic session restorer on app bootup
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (window.NurCore) {
+                    const snap = window.NurCore.getSnapshot();
+                    if (snap && snap.user && snap.user.authenticated) {
+                        unlockAppInterface(snap.user.name || "Authenticated Node");
                     }
                 }
-            }
-        }, 50);
+            }, 300);
+        });
     </script>
 </body>
 </html>
