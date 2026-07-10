@@ -450,18 +450,20 @@
         }
 
         // --- 3. CLOCK & LOCATION ENGINE ---
-        setInterval(() => {
-            const clock = document.getElementById('clock');
-            if(clock) clock.innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
-        }, 1000);
+setInterval(() => {
+    const clock = document.getElementById('clock');
+    if(clock) clock.innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
+}, 1000);
 
-        async function fetchDashboard() {
-    // 1. Read synchronized parameters from the core engine
-    const coreSnapshot = window.NurCore.getSnapshot();
-    const lastRead = coreSnapshot.readingHistory;
+async function fetchDashboard() {
+    // 1. Read synchronized parameters from the core engine safely
+    const coreSnapshot = window.NurCore ? window.NurCore.getSnapshot() : null;
+    const lastRead = coreSnapshot ? coreSnapshot.readingHistory : null;
     
     // 2. Safely find or insert a persistent UI element into your design
     let targetContainer = document.getElementById('location')?.parentElement;
+    
+    // Fixed: Added optional chaining (lastRead?.lastSurahName) to prevent crashing if history is empty
     if (targetContainer && lastRead && lastRead.lastSurahName) {
         let historyWidget = document.getElementById('core-history-widget');
         if (!historyWidget) {
@@ -485,7 +487,7 @@
                 const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=en`);
                 const data = await res.json();
                 const locEl = document.getElementById('location');
-                if(locEl) locEl.innerText = `${data.city}, ${data.countryCode}`;
+                if(locEl) locEl.innerText = `${data.city || data.locality || 'Unknown'}, ${data.countryCode}`;
             } catch (e) { 
                 const locEl = document.getElementById('location');
                 if(locEl) locEl.innerText = "Location Active"; 
@@ -493,6 +495,7 @@
         });
     }
 }
+
 
             }
         }
