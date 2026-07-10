@@ -202,6 +202,121 @@
             <i class="fa-solid fa-kaaba text-[30rem] absolute -top-20 -left-20 text-emerald-200"></i>
             <i class="fa-solid fa-graduation-cap text-[30rem] absolute -bottom-20 -right-20 text-amber-200"></i>
         </div>
+        <!-- ISLAMIC OS PREMIUM REALTIME DASHBOARD -->
+<section id="islamic-os-dashboard" class="py-12 px-6 max-w-7xl mx-auto reveal animate__animated animate__fadeIn">
+    <div class="text-center mb-10">
+        <h2 class="serif text-4xl md:text-5xl font-black text-slate-900">Spiritual <span class="text-emerald-500">Dashboard</span></h2>
+        <p class="text-slate-400 font-bold text-xs uppercase tracking-widest mt-2">موجودہ اسلامی سرگرمی اور لائیو ترقی</p>
+    </div>
+
+    <!-- Bento Box Grid Structural Setup -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Box 1: Quran Analytics -->
+        <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
+            <div class="flex justify-between items-start">
+                <div class="w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-book-quran"></i></div>
+                <span id="quran-streak-badge" class="bg-emerald-100 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full">0 DAY STREAK</span>
+            </div>
+            <div class="mt-4">
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Quran Reading</p>
+                <h3 id="db-quran-ayahs" class="text-3xl font-black text-slate-800 mt-1">0 <span class="text-xs text-slate-400 font-medium">Ayahs</span></h3>
+            </div>
+            <p id="db-last-surah" class="text-xs text-slate-500 mt-3 font-medium truncate">آخری بار پڑھا گیا: لوڈ ہو رہا ہے...</p>
+        </div>
+
+        <!-- Box 2: Prayer Tracker -->
+        <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
+            <div class="flex justify-between items-start">
+                <div class="w-10 h-10 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-mosque"></i></div>
+                <span id="next-prayer-countdown" class="bg-blue-100 text-blue-600 text-[10px] font-black px-3 py-1 rounded-full">--:-- Next Prayer</span>
+            </div>
+            <div class="mt-4">
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Prayers Today</p>
+                <h3 id="db-prayers-count" class="text-3xl font-black text-slate-800 mt-1">0 / 5</h3>
+            </div>
+            <div id="db-prayer-dots" class="flex gap-2 mt-3">
+                <span class="w-2 h-2 rounded-full bg-slate-200"></span>
+                <span class="w-2 h-2 rounded-full bg-slate-200"></span>
+                <span class="w-2 h-2 rounded-full bg-slate-200"></span>
+                <span class="w-2 h-2 rounded-full bg-slate-200"></span>
+                <span class="w-2 h-2 rounded-full bg-slate-200"></span>
+            </div>
+        </div>
+
+        <!-- Box 3: Hadith Analytics -->
+        <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
+            <div class="flex justify-between items-start">
+                <div class="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-book"></i></div>
+            </div>
+            <div class="mt-4">
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Hadith Logged</p>
+                <h3 id="db-hadith-count" class="text-3xl font-black text-slate-800 mt-1">0 <span class="text-xs text-slate-400 font-medium">Read</span></h3>
+            </div>
+            <p id="db-last-hadith" class="text-xs text-slate-500 mt-3 font-medium truncate">کتاب: لوڈ ہو رہا ہے...</p>
+        </div>
+
+        <!-- Box 4: Tasbeeh Counter Metrics -->
+        <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
+            <div class="flex justify-between items-start">
+                <div class="w-10 h-10 bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-circle-dot"></i></div>
+                <span id="db-tasbeeh-goals" class="bg-purple-100 text-purple-600 text-[10px] font-black px-3 py-1 rounded-full">0 Goals Met</span>
+            </div>
+            <div class="mt-4">
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Total Dhikr</p>
+                <h3 id="db-tasbeeh-total" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+            </div>
+            <p class="text-xs text-slate-500 mt-3 font-medium">ایپ ٹائم: <span id="db-time-spent">0</span> منٹ</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- Dashboard Reactive Injector Script -->
+<script>
+    function renderDashboardData() {
+        if (!window.NurCore) return;
+        const state = window.NurCore.getSnapshot();
+        
+        // Render Quran Data
+        document.getElementById('db-quran-ayahs').innerHTML = `${state.readingHistory.totalAyahsRead || 0} <span class="text-xs text-slate-400 font-medium">Ayahs</span>`;
+        document.getElementById('db-last-surah').innerText = state.readingHistory.lastSurahName ? `آخری بار: ${state.readingHistory.lastSurahName}` : "آخری بار: کچھ نہیں پڑھا گیا";
+        
+        // Render Prayer Data
+        const todayKey = new Date().toDateString();
+        const prayersToday = state.prayerHistory[todayKey] || {};
+        const completedCount = Object.values(prayersToday).filter(v => v === true).length;
+        document.getElementById('db-prayers-count').innerText = `${completedCount} / 5`;
+        
+        const dotsContainer = document.getElementById('db-prayer-dots');
+        const order = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+        dotsContainer.innerHTML = order.map(p => `
+            <span class="w-2.5 h-2.5 rounded-full ${prayersToday[p] ? 'bg-blue-500 shadow-sm' : 'bg-slate-200'}" title="${p}"></span>
+        `).join('');
+
+        // Render Hadith Data
+        document.getElementById('db-hadith-count').innerHTML = `${state.hadithState.totalHadithRead || 0} <span class="text-xs text-slate-400 font-medium">Read</span>`;
+        document.getElementById('db-last-hadith').innerText = state.hadithState.lastBookName ? `کتاب: ${state.hadithState.lastBookName}` : "کتاب: کوئی انتخاب نہیں";
+
+        // Render Tasbeeh Data
+        document.getElementById('db-tasbeeh-total').innerText = state.tasbeehAnalytics.totalCounts || 0;
+        document.getElementById('db-tasbeeh-goals').innerText = `${state.tasbeehAnalytics.dailyGoalsCompleted || 0} Goals Met`;
+        document.getElementById('db-time-spent').innerText = state.appUsage.totalTimeSpent || 0;
+    }
+
+    // لائیو رئیل ٹائم اپڈیٹ کو ہینڈل کرنا
+    window.addEventListener('nurStateSync', renderDashboardData);
+    window.addEventListener('load', () => {
+        renderDashboardData();
+        // ایپ ٹائمر ٹریکر رن کرنا
+        setInterval(() => {
+            if (window.NurCore && typeof window.NurCore.trackTime === 'function') {
+                window.NurCore.trackTime(1);
+            }
+        }, 60000);
+    });
+    </script>
+        
 
         <div class="timeline-path-light"><div id="timeline-progress-light"></div></div>
 
