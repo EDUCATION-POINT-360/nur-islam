@@ -456,18 +456,44 @@
         }, 1000);
 
         async function fetchDashboard() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    try {
-                        const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=en`);
-                        const data = await res.json();
-                        const locEl = document.getElementById('location');
-                        if(locEl) locEl.innerText = `${data.city}, ${data.countryCode}`;
-                    } catch (e) { 
-                        const locEl = document.getElementById('location');
-                        if(locEl) locEl.innerText = "Location Active"; 
-                    }
-                });
+    // 1. Read synchronized parameters from the core engine
+    const coreSnapshot = window.NurCore.getSnapshot();
+    const lastRead = coreSnapshot.readingHistory;
+    
+    // 2. Safely find or insert a persistent UI element into your design
+    let targetContainer = document.getElementById('location')?.parentElement;
+    if (targetContainer && lastRead && lastRead.lastSurahName) {
+        let historyWidget = document.getElementById('core-history-widget');
+        if (!historyWidget) {
+            historyWidget = document.createElement('div');
+            historyWidget.id = 'core-history-widget';
+            historyWidget.className = 'mt-4 border-t border-white/10 pt-4';
+            targetContainer.appendChild(historyWidget);
+        }
+        historyWidget.innerHTML = `
+            <h6 class="text-emerald-400 font-black uppercase text-[9px] tracking-widest mb-1">Last Read Reading Position</h6>
+            <a href="quran.html" class="text-sm font-bold text-white hover:text-emerald-300 transition italic">
+                <i class="fa-solid fa-book-open text-xs mr-2 text-emerald-400"></i>Continue ${lastRead.lastSurahName}
+            </a>
+        `;
+    }
+
+    // Keep your legacy location engine completely intact
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            try {
+                const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=en`);
+                const data = await res.json();
+                const locEl = document.getElementById('location');
+                if(locEl) locEl.innerText = `${data.city}, ${data.countryCode}`;
+            } catch (e) { 
+                const locEl = document.getElementById('location');
+                if(locEl) locEl.innerText = "Location Active"; 
+            }
+        });
+    }
+}
+
             }
         }
 
