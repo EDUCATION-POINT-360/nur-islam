@@ -1,6 +1,6 @@
 /**
- * NUR ISLAMIC PLATFORM - GLOBAL STATE, SUPABASE & REALTIME SYNC ENGINE (FINAL PRODUCTION)
- * Centralized State Machine for Synchronization, Multi-Tab Harmony & Offline Consistency
+ * NUR ISLAMIC PLATFORM - GLOBAL STATE, SUPABASE, REALTIME SYNC & AUDIO ENGINE (FINAL PRODUCTION)
+ * Centralized State Machine for Synchronization, Multi-Tab Harmony, Offline Consistency, and Prayer Monitoring
  */
 
 // Dynamically inject Supabase CDN dependencies safely prior to core initiation
@@ -16,8 +16,17 @@ window.NurCore = (function () {
     // Explicit production API credentials
     const SUPABASE_URL = "https://njcnfxzwuzmfywvrdgub.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_Wd5JwhQnUL8fV8-wqGjrxw_5U0Oe3YQ";
+    
     let supabaseClient = null;
     let realtimeChannel = null; // Holds the active real-time WebSocket stream
+    let adhanAudio = null;
+    let alarmCheckingInterval = null;
+
+    // Standard public high-fidelity Adhan stream audio sources
+    const ADHAN_SOURCES = {
+        standard: "https://www.islamcan.com/audio/adhan/azan1.mp3",
+        fajr: "https://www.islamcan.com/audio/adhan/azan2.mp3"
+    };
 
     // Unified Data Structure Schema
     const DEFAULT_STATE = {
@@ -63,8 +72,13 @@ window.NurCore = (function () {
     const initInterval = setInterval(() => {
         if (window.supabase) {
             clearInterval(initInterval);
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            bindAuthListener();
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                bindAuthListener();
+                console.log("[NUR Core] Supabase connection layer integrated smoothly.");
+            } catch (err) {
+                console.error("[NUR Core] Infrastructure initiation halted:", err);
+            }
         }
     }, 100);
 
@@ -72,7 +86,9 @@ window.NurCore = (function () {
     function saveState(skipCloudPush = false) {
         localStorage.setItem(STATE_KEY, JSON.stringify(globalState));
         window.dispatchEvent(new CustomEvent('nurStateSync', { detail: globalState }));
-        if (!skipCloudPush) pushToCloud();
+        if (!skipCloudPush && navigator.onLine) {
+            pushToCloud();
+        }
     }
 
     // Listen for cross-tab updates from other open browser instances
@@ -85,7 +101,7 @@ window.NurCore = (function () {
 
     // 🔄 CLOUD SYNCHRONIZATION ENGINES (Asynchronous background push updates)
     async function pushToCloud() {
-        if (!supabaseClient || !globalState.user.authenticated) return;
+        if (!supabaseClient || !globalState.user.authenticated || !navigator.onLine) return;
         const uid = globalState.user.id;
 
         try {
@@ -112,7 +128,7 @@ window.NurCore = (function () {
                 });
             }
         } catch (err) {
-            console.error("Cloud write deferral encountered:", err);
+            console.warn("[NUR Cloud] Auto-synchronization postponed until connection is stable:", err);
         }
     }
 
@@ -138,7 +154,7 @@ window.NurCore = (function () {
 
     // 📥 CLOUD RETRIEVAL LAYER
     async function pullFromCloud() {
-        if (!supabaseClient || !globalState.user.authenticated) return;
+        if (!supabaseClient || !globalState.user.authenticated || !navigator.onLine) return;
         const uid = globalState.user.id;
 
         try {
@@ -170,13 +186,14 @@ window.NurCore = (function () {
             }
             localStorage.setItem(STATE_KEY, JSON.stringify(globalState));
         } catch (err) {
-            console.error("Cloud pull processing deferred:", err);
+            console.error("[NUR Cloud] Historical pull failure:", err);
         }
     }
 
     // 📡 LIVE WEB-SOCKET REPLICATION STREAM CONTROLLER
     function initializeRealtimeSync(userId) {
         if (realtimeChannel) unsubscribeRealtime();
+        if (!supabaseClient) return;
 
         realtimeChannel = supabaseClient
             .channel(`public-sync-room:${userId}`)
@@ -217,6 +234,58 @@ window.NurCore = (function () {
             realtimeChannel = null;
         }
     }
+
+    // 🔊 AUDIO & RUNTIME ALARM CONTROLLERS
+    function unlockAudioEngine() {
+        if (!adhanAudio) {
+            adhanAudio = new Audio();
+            // Pre-load a silent byte to clear the browser's hardware lock
+            adhanAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+            adhanAudio.play().then(() => {
+                console.log("[NUR Audio] Audio layer successfully unlocked by user interaction.");
+            }).catch(err => console.log("[NUR Audio] Waiting for explicit click gesture to clear lock."));
+        }
+    }
+
+    function triggerAdhanPlayback(type = 'standard') {
+        if (!adhanAudio) adhanAudio = new Audio();
+        
+        try {
+            adhanAudio.src = ADHAN_SOURCES[type] || ADHAN_SOURCES.standard;
+            adhanAudio.loop = false;
+            adhanAudio.play()
+                .then(() => console.log(`[NUR Audio] Adhan broadcast pipeline launched successfully: ${type}`))
+                .catch(err => console.error("[NUR Audio] Hardware playback blocked. Ensure unlockAudioEngine() was called on user click:", err));
+        } catch (e) {
+            console.error("[NUR Audio] Stream configuration fault:", e);
+        }
+    }
+
+    function startPrayerAlarmEngine(dailyTimetable) {
+        if (alarmCheckingInterval) clearInterval(alarmCheckingInterval);
+        console.log("[NUR Alarms] Active tracking clock running.");
+
+        alarmCheckingInterval = setInterval(() => {
+            const now = new Date();
+            const currentHours = String(now.getHours()).padStart(2, '0');
+            const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+            const currentTimeStr = `${currentHours}:${currentMinutes}`;
+
+            // Check match parameters across each prayer timing element
+            for (const [prayerName, alertTime] of Object.entries(dailyTimetable)) {
+                if (currentTimeStr === alertTime && now.getSeconds() === 0) {
+                    console.log(`[NUR Alarms] Alert target reached for: ${prayerName}! Triggering adhan.`);
+                    triggerAdhanPlayback(prayerName.toLowerCase() === 'fajr' ? 'fajr' : 'standard');
+                    
+                    // Fire global event notification to update visual components
+                    window.dispatchEvent(new CustomEvent('nurAdhanTrigger', { detail: { name: prayerName } }));
+                }
+            }
+        }, 1000); // Step tick matches every second boundary precisely
+    }
+
+    // Listen for connection status changes to automatically execute background syncs
+    window.addEventListener('online', () => { if (globalState.user.authenticated) pushToCloud(); });
 
     // 4. Exposed Core Operations API
     return {
@@ -304,6 +373,12 @@ window.NurCore = (function () {
             globalState.bookmarks[moduleContext] = registry;
             saveState();
             return stateFlag; // true = added, false = removed
-        }
+        },
+
+        // Phase 6 Audio Interfaces
+        unlockAudio: unlockAudioEngine,
+        playManualAdhan: triggerAdhanPlayback,
+        stopAdhan: () => { if (adhanAudio) adhanAudio.pause(); },
+        initializeAlarms: startPrayerAlarmEngine
     };
 })();
