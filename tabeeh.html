@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NUR ADKHAR | SUPREME TASBEEH HUB</title>
+    <script src="nur-core.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-	 <link rel="icon" href="logo.png" type="image/png" />
+    <link rel="icon" href="logo.png" type="image/png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap');
@@ -146,9 +147,14 @@
             let rotation = (count / target) * 360;
             document.getElementById('ring').style.transform = `rotate(${rotation}deg)`;
 
+            if (window.NurCore && typeof window.NurCore.recordTasbeehMetric === 'function') {
+                const activeZikr = document.getElementById('current-dhikr')?.innerText || "Default Dhikr";
+                window.NurCore.recordTasbeehMetric(1, activeZikr, target);
+            }
+
             if (count >= target && target < 90000) {
                 document.getElementById('counter').style.color = 'gold';
-                if('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+                if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
             }
         }
 
