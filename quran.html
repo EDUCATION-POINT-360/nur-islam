@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NUR QURAN | Premium Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+	<head>
+    <script src="nur-core.js"></script>
 	 <link rel="icon" href="logo.png" type="image/png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
@@ -143,19 +145,19 @@
         }
 
         async function loadSurah(id, name) {
-            // Save Memory
-            localStorage.setItem('lastReadId', id);
-            localStorage.setItem('lastReadName', name);
-            checkLastRead();
+    // Save to the master engine first
+    window.NurCore.saveSurahProgress(id, name);
+    checkLastRead(); // Triggers your original layout badge adjustments safely[span_4](start_span)[span_4](end_span)
 
-            document.getElementById('view-index').classList.add('hidden');
-            const reader = document.getElementById('view-reader');
-            reader.classList.remove('hidden');
-            document.getElementById('homeBtn').classList.remove('hidden');
-            document.getElementById('player-ui').classList.add('active');
-            document.getElementById('playing-name').innerText = name;
-            reader.scrollTop = 0;
+    document.getElementById('view-index').classList.add('hidden');[span_5](start_span)[span_5](end_span)
+    const reader = document.getElementById('view-reader');[span_6](start_span)[span_6](end_span)
+    reader.classList.remove('hidden');[span_7](start_span)[span_7](end_span)
+    document.getElementById('homeBtn').classList.remove('hidden');[span_8](start_span)[span_8](end_span)
+    document.getElementById('player-ui').classList.add('active');[span_9](start_span)[span_9](end_span)
+    document.getElementById('playing-name').innerText = name;[span_10](start_span)[span_10](end_span)
+    reader.scrollTop = 0;[span_11](start_span)[span_11](end_span)
 
+    // ... The rest of your original fetch and audio code stays exactly the same[span_12](start_span)[span_12](end_span)
             const display = document.getElementById('ayat-display');
             display.innerHTML = `<div class="text-center py-40"><i class="fa-solid fa-spinner fa-spin text-4xl text-slate-200"></i></div>`;
 
