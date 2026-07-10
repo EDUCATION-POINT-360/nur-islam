@@ -95,9 +95,19 @@
             if (!res.ok) throw new Error("Proxy connection failed");
             
             const wrapper = await res.json();
-            return JSON.parse(wrapper.contents);
+            if (wrapper && wrapper.contents) {
+                return JSON.parse(wrapper.contents);
+            }
+            return null;
         } catch (err) {
             console.error("Fetch Error:", err);
+            // Fallback direct call if proxy fails
+            try {
+                const directRes = await fetch(targetUrl);
+                if (directRes.ok) return await directRes.json();
+            } catch(e) {
+                console.error("Direct Fetch Error:", e);
+            }
             return null;
         }
     }
@@ -109,8 +119,8 @@
         if (!data || !data.books) {
             grid.innerHTML = `
                 <div class="col-span-full p-8 text-center bg-red-50 rounded-2xl">
-                    <p class="font-urdu text-red-600">سرور سے ڈیٹا حاصل نہیں ہو سکا</p>
-                    <button onclick="location.reload()" class="mt-4 text-xs bg-red-600 text-white px-4 py-2 rounded-lg">دوبارہ کوشش کریں</button>
+                    <p class="font-urdu text-red-600">سرور سے ڈیٹا حاصل نہیں ہو سکا یا نیٹ ورک کا مسئلہ ہے</p>
+                    <button onclick="loadBooks()" class="mt-4 text-xs bg-emerald-600 text-white px-4 py-2 rounded-lg">دوبارہ کوشش کریں</button>
                 </div>`;
             return;
         }
@@ -140,15 +150,21 @@
 
         const chapBox = document.getElementById('list-chapters');
         chapBox.innerHTML = '<div class="py-10 text-center"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i></div>';
+        
+        document.getElementById('placeholder').classList.remove('hidden');
+        document.getElementById('list-hadiths').innerHTML = '';
 
         const data = await apiRequest(`${slug}/chapters`);
-        if (!data || !data.chapters) return;
+        if (!data || !data.chapters) {
+            chapBox.innerHTML = '<div class="p-4 text-center text-xs text-red-500 font-urdu">ابواب لوڈ کرنے میں ناکامی</div>';
+            return;
+        }
 
         chapBox.innerHTML = '';
         data.chapters.forEach(ch => {
             const btn = document.createElement('div');
             btn.className = "p-4 rounded-xl cursor-pointer text-right font-urdu text-sm hover:bg-emerald-50 transition-all ch-item";
-            btn.innerHTML = ch.chapterUrdu;
+            btn.innerHTML = ch.chapterUrdu || `باب ${ch.chapterNumber}`;
             btn.onclick = () => {
                 document.querySelectorAll('.ch-item').forEach(el => el.classList.remove('active-ch'));
                 btn.classList.add('active-ch');
@@ -170,19 +186,26 @@
         list.innerHTML = '<div class="py-20 text-center"><i class="fa-solid fa-sun fa-spin text-emerald-500 text-3xl"></i></div>';
                               
         const data = await apiRequest(`hadiths?book=${activeSlug}&chapter=${id}&paginate=50`);
-        if (!data || !data.hadiths) return;
+        
+        // Handling both api response structures safely
+        const hadithsArray = data && data.hadiths && data.hadiths.data ? data.hadiths.data : (data && data.hadiths ? data.hadiths : null);
+
+        if (!hadithsArray || hadithsArray.length === 0) {
+            list.innerHTML = '<div class="py-20 text-center font-urdu text-slate-400">اس باب میں کوئی حدیث دستیاب نہیں ہے یا سرور کا مسئلہ ہے۔</div>';
+            return;
+        }
 
         list.innerHTML = '';
-        data.hadiths.data.forEach(h => {
+        hadithsArray.forEach(h => {
             const card = document.createElement('article');
-            card.className = "space-y-8";
+            card.className = "space-y-8 animate-fade-in";
             card.innerHTML = `
                 <div class="flex items-center gap-4">
-                    <span class="text-[10px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">HADITH ${h.hadithNumber}</span>
+                    <span class="text-[10px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">HADITH ${h.hadithNumber || ''}</span>
                     <div class="h-px bg-slate-100 flex-1"></div>
                 </div>
-                <p class="font-arabic text-right leading-loose" dir="rtl">${h.hadithArabic}</p>
-                <p class="font-urdu text-slate-600 text-right leading-relaxed" dir="rtl">${h.hadithUrdu}</p>
+                <p class="font-arabic text-right leading-loose" dir="rtl">${h.hadithArabic || ''}</p>
+                <p class="font-urdu text-slate-600 text-right leading-relaxed" dir="rtl">${h.hadithUrdu || ''}</p>
             `;
             list.appendChild(card);
         });
