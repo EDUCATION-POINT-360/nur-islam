@@ -209,6 +209,7 @@
             setInterval(updateTime, 1000);
             fetchLocation();
             renderRakat();
+            renderUI();
             renderHistory();
         }
 
@@ -227,38 +228,50 @@
 
         async function fetchLocation() {
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&method=2`);
-                const data = await res.json();
-                times = data.data.timings;
-                document.getElementById('loc-display').innerText = data.data.meta.timezone.split('/')[1];
-                document.getElementById('hijri-date').innerText = `${data.data.date.hijri.day} ${data.data.date.hijri.month.en} ${data.data.date.hijri.year} AH`;
-                renderUI();
+                try {
+                    const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&method=2`);
+                    const data = await res.json();
+                    times = data.data.timings;
+                    document.getElementById('loc-display').innerText = data.data.meta.timezone.split('/')[1] || "Detected Location";
+                    document.getElementById('hijri-date').innerText = `${data.data.date.hijri.day} ${data.data.date.hijri.month.en} ${data.data.date.hijri.year} AH`;
+                    renderUI();
+                } catch (err) {
+                    console.error("Location timing parsing deferred:", err);
+                }
             });
         }
 
         function renderUI() {
             const grid = document.getElementById('prayer-grid');
             const tracker = document.getElementById('tracker-list');
-            const logs = JSON.parse(localStorage.getItem('nur_day_track') || '{}');
+            if (!grid || !tracker) return;
+
+            // Interface pulling from unified NurCore State Engine
+            const coreSnapshot = (window.NurCore && typeof window.NurCore.getSnapshot === 'function') ? window.NurCore.getSnapshot() : null;
+            const todayKey = new Date().toDateString();
+            const prayerLogs = (coreSnapshot && coreSnapshot.prayerHistory && coreSnapshot.prayerHistory[todayKey]) ? coreSnapshot.prayerHistory[todayKey] : {};
 
             grid.innerHTML = ''; tracker.innerHTML = '';
             pData.forEach(p => {
                 const isNow = checkNow(times[p.id]);
+                const displayTime = times[p.id] || '--:--';
+                const isCompleted = !!prayerLogs[p.id];
+
                 grid.innerHTML += `
                     <div class="glass p-6 rounded-[2.5rem] text-center ${isNow ? 'prayer-active' : ''}">
                         <i data-lucide="${p.icon}" class="w-5 h-5 mx-auto mb-2 text-slate-400"></i>
                         <p class="text-[9px] font-black uppercase text-slate-400 tracking-widest">${p.id}</p>
-                        <h4 class="text-2xl font-black">${times[p.id]}</h4>
+                        <h4 class="text-2xl font-black">${displayTime}</h4>
                     </div>
                 `;
 
                 tracker.innerHTML += `
                     <label class="flex items-center justify-between p-4 glass rounded-3xl cursor-pointer hover:bg-white">
                         <div class="flex items-center gap-4">
-                            <input type="checkbox" onchange="mark('${p.id}', this.checked)" ${logs[p.id] ? 'checked' : ''} class="w-5 h-5 rounded-full border-none bg-slate-100 text-blue-600 focus:ring-0">
+                            <input type="checkbox" onchange="mark('${p.id}', this.checked)" ${isCompleted ? 'checked' : ''} class="w-5 h-5 rounded-full border-none bg-slate-100 text-blue-600 focus:ring-0">
                             <span class="font-bold text-slate-700">${p.id}</span>
                         </div>
-                        <span class="text-[10px] font-black text-slate-300 uppercase">${times[p.id]}</span>
+                        <span class="text-[10px] font-black text-slate-300 uppercase">${displayTime}</span>
                     </label>
                 `;
             });
@@ -267,6 +280,8 @@
 
         function renderRakat() {
             const stack = document.getElementById('rakat-stack');
+            if (!stack) return;
+            stack.innerHTML = '';
             pData.forEach(p => {
                 stack.innerHTML += `
                     <div class="p-4 bg-white/50 rounded-3xl border border-white">
@@ -290,23 +305,43 @@
             
             if (window.NurCore && typeof window.NurCore.setPrayerStatus === 'function') {
                 window.NurCore.setPrayerStatus(todayKey, id, val);
+            } else {
+                // Secondary fallback layer in case NurCore initialization takes a cycle
+                let legacyGrowthMap = JSON.parse(localStorage.getItem('nur_growth_stats') || '{}');
+                let logs = JSON.parse(localStorage.getItem('nur_day_track') || '{}');
+                logs[id] = val;
+                localStorage.setItem('nur_day_track', JSON.stringify(logs));
+                const count = Object.values(logs).filter(v => v).length;
+                legacyGrowthMap[todayKey] = (count / 5) * 100;
+                localStorage.setItem('nur_growth_stats', JSON.stringify(legacyGrowthMap));
             }
             
-            let logs = JSON.parse(localStorage.getItem('nur_day_track') || '{}');
-            logs[id] = val;
-            localStorage.setItem('nur_day_track', JSON.stringify(logs));
-
-            let hist = JSON.parse(localStorage.getItem('nur_growth_stats') || '{}');
-            const count = Object.values(logs).filter(v => v).length;
-            hist[todayKey] = (count / 5) * 100;
-            localStorage.setItem('nur_growth_stats', JSON.stringify(hist));
-            
+            renderUI();
             renderHistory();
         }
 
         function renderHistory() {
             const container = document.getElementById('growth-bars');
-            const hist = JSON.parse(localStorage.getItem('nur_growth_stats') || '{}');
+            if (!container) return;
+
+            const coreSnapshot = (window.NurCore && typeof window.NurCore.getSnapshot === 'function') ? window.NurCore.getSnapshot() : null;
+            let hist = {};
+
+            if (coreSnapshot && coreSnapshot.prayerHistory) {
+                // Synthesize execution percentages from real-time global object schema
+                Object.keys(coreSnapshot.prayerHistory).forEach(dateStr => {
+                    const dailyMap = coreSnapshot.prayerHistory[dateStr];
+                    if (dailyMap._migratedScore !== undefined) {
+                        hist[dateStr] = dailyMap._migratedScore;
+                    } else {
+                        const completedCount = Object.keys(dailyMap).filter(k => k !== '_migratedScore' && dailyMap[k] === true).length;
+                        hist[dateStr] = (completedCount / 5) * 100;
+                    }
+                });
+            } else {
+                hist = JSON.parse(localStorage.getItem('nur_growth_stats') || '{}');
+            }
+
             container.innerHTML = '';
             for (let i = 6; i >= 0; i--) {
                 const d = new Date(); d.setDate(d.getDate() - i);
@@ -337,6 +372,13 @@
             document.getElementById('adhan-audio').pause();
         }
 
+        // Listen for live backend cloud modifications or cross-tab operations
+        window.addEventListener('nurStateSync', () => {
+            console.log('[NUR Realtime] Intercepted cross-device update. Updating UI checklists live.');
+            renderUI();
+            renderHistory();
+        });
+            
         init();
     </script>
 </body>
