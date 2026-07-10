@@ -19,13 +19,11 @@
                     .then((registration) => {
                         console.log('[NUR PWA] Service Worker securely registered under scope:', registration.scope);
 
-                        // Detect immediate worker script updates
                         registration.addEventListener('updatefound', () => {
                             const newWorker = registration.installing;
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                                     console.log('[NUR PWA] New core engine updates are available. Refreshing cache seamlessly.');
-                                    // Optional: Trigger a clean hot reload to serve fresh cache states immediately
                                     window.location.reload();
                                 }
                             });
@@ -37,7 +35,6 @@
             });
         }
 
-        // Network Status Lifecycle Listeners
         window.addEventListener('online', () => {
             console.log('[NUR PWA] Live network stream restored. Synchronizing background buffers.');
             document.documentElement.classList.remove('offline-mode');
@@ -48,8 +45,7 @@
             document.documentElement.classList.add('offline-mode');
         });
     </script>
-</head>
-	
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Amiri:wght@400;700&family=Playfair+Display:ital,wght@0,900;1,900&display=swap');
         
@@ -74,69 +70,52 @@
         .reveal { opacity: 0; transform: translateY(50px); transition: all 1s cubic-bezier(0.2, 1, 0.3, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
 
-        @media (max-width: 1024px) { .timeline-path { left: 30px; transform: none; } }
+        /* Glassmorphism Classes - Clear/White Theme */
+        .glass-card-light { background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); }
+        .glass-btn-light { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.8); transition: all 0.3s ease; }
+        .glass-btn-light:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-2px); }
+
+        .timeline-path-light { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: rgba(226, 232, 240, 0.5); transform: translateX(-50%); overflow: hidden; }
+        #timeline-progress-light { position: absolute; top: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to bottom, #10b981, #06b6d4, #f59e0b); transition: height 0.3s ease-out; box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+
+        .timeline-node-light { position: absolute; left: 50%; width: 20px; height: 20px; background: white; border: 4px solid #e2e8f0; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; transition: all 0.6s ease; }
+        .timeline-node-light.active { border-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.8); }
+
+        .reveal-wipe { opacity: 0; clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%); transition: all 1.2s cubic-bezier(0.77, 0, 0.175, 1); }
+        .reveal-wipe.active { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); }
+
+        @media (max-width: 1024px) {
+            .timeline-path, .timeline-path-light, .timeline-node-light { display: none; }
+        }
+        
+        .menu-open #menu-items { opacity: 1 !important; transform: translateY(0) !important; pointer-events: auto !important; }
+        .menu-open #menu-icon { transform: rotate(135deg); }
+        #menu-items > div:nth-child(4) { transition-delay: 0.05s; }
+        #menu-items > div:nth-child(3) { transition-delay: 0.1s; }
+        #menu-items > div:nth-child(2) { transition-delay: 0.15s; }
+        #menu-items > div:nth-child(1) { transition-delay: 0.2s; }
     </style>
 </head>
-<body class="antialiased">
-<!-- Drop this UI block into your interface code to handle client sessions -->
-<div id="nur-auth-widget" class="p-4 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/10 max-w-sm mx-auto mt-6">
-    <div id="auth-logged-out" class="space-y-3">
-        <p class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Cloud Sync Profile</p>
-        <input type="email" id="auth-email" placeholder="Email Address" class="w-full text-xs p-2.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-emerald-500">
-        <input type="password" id="auth-pass" placeholder="Password" class="w-full text-xs p-2.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-emerald-500">
-        <button onclick="handleCoreLogin()" class="w-full py-2 bg-emerald-500 text-black font-bold text-xs rounded-lg shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition">
-            Sign In / Sync Data
-        </button>
-    </div>
-    <div id="auth-logged-in" class="hidden flex justify-between items-center">
-        <div>
-            <p class="text-[10px] font-bold text-emerald-400 tracking-widest uppercase">CONNECTED PROFILE</p>
-            <h4 id="auth-user-name" class="text-sm font-bold text-white">Seeker</h4>
-        </div>
-        <button onclick="window.NurCore.triggerLogout()" class="px-3 py-1.5 border border-red-500/30 text-red-400 text-[11px] font-bold rounded-lg bg-red-500/10 hover:bg-red-500 hover:text-white transition">
-            Disconnect
-        </button>
-    </div>
-</div>
+<body class="antialiased bg-[#fafafa]">
 
-<script>
-    async function handleCoreLogin() {
-        const email = document.getElementById('auth-email').value;
-        const pass = document.getElementById('auth-pass').value;
-        const { error } = await window.NurCore.triggerLogin(email, pass);
-        if (error) alert("Authentication Encountered an Error: " + error.message);
-    }
-
-    // Monitor engine actions to shift layouts smoothly
-    window.addEventListener('nurStateSync', () => {
-        const user = window.NurCore.getSnapshot().user;
-        if (user.authenticated) {
-            document.getElementById('auth-logged-out').classList.add('hidden');
-            document.getElementById('auth-logged-in').classList.remove('hidden');
-            document.getElementById('auth-user-name').innerText = user.name;
-        } else {
-            document.getElementById('auth-logged-out').classList.remove('hidden');
-            document.getElementById('auth-logged-in').classList.add('hidden');
-        }
-    });
-</script>
-	
+    <!-- Glassmorphic Navigation -->
     <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-[100] glass rounded-3xl border border-white/20 px-6 py-4 flex justify-between items-center shadow-2xl">
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-emerald-400"><i class="fa-solid fa-bolt-lightning"></i></div>
             <span class="text-xl font-black italic tracking-tighter">NUR<span class="text-emerald-500">.</span></span>
         </div>
-        <div class="hidden lg:flex gap-8 font-bold text-[10px] uppercase tracking-widest text-slate-400">
+        <div class="hidden lg:flex gap-8 font-bold text-[10px] uppercase tracking-widest text-slate-400 items-center">
             <a href="quran.html" class="hover:text-emerald-500 transition">Quran</a>
             <a href="hadees.html" class="hover:text-emerald-500 transition">Hadith</a>
             <a href="https://education-point-360.github.io/NUR/" class="hover:text-emerald-500 transition">AI Tools</a>
             <a href="adkhar.html" class="hover:text-emerald-500 transition">Adkhar</a>
-		   <a href="namaz.html" class="px-5 py-2 bg-slate-900 text-white rounded-xl hover:bg-emerald-500 transition shadow-xl">Prayer Hub</a>
-		    <a href="tabeeh.html" class="px-5 py-2 bg-slate-900 text-white rounded-xl hover:bg-emerald-500 transition shadow-xl">Tasbeeh</a>
+            <a href="namaz.html" class="px-5 py-2 bg-slate-900 text-white rounded-xl hover:bg-emerald-500 transition shadow-xl">Prayer Hub</a>
+            <a href="tabeeh.html" class="px-5 py-2 bg-slate-900 text-white rounded-xl hover:bg-emerald-500 transition shadow-xl">Tasbeeh</a>
         </div>
         <button onclick="toggleSidebar(true)" class="lg:hidden text-xl"><i class="fa-solid fa-bars-staggered"></i></button>
     </nav>
 
+    <!-- Sidebar Menu Layer -->
     <div id="sidebar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[110] hidden opacity-0 transition-opacity">
         <div class="w-80 h-full bg-white ml-auto p-12 flex flex-col shadow-2xl">
             <button onclick="toggleSidebar(false)" class="self-end text-3xl mb-12 text-slate-300"><i class="fa-solid fa-xmark"></i></button>
@@ -146,16 +125,17 @@
                 <a href="https://education-point-360.github.io/NUR/">AI Assistant</a>
                 <a href="namaz.html">Prayer Hub</a>
                 <a href="tabeeh.html">Tasbeeh</a>
-				<a href="adkhar.html">Adkhar</a>
+                <a href="adkhar.html">Adkhar</a>
             </nav>
         </div>
     </div>
 
+    <!-- Main App Header Base -->
     <header class="h-screen flex items-center justify-center text-center px-6 relative overflow-hidden bg-white">
         <div class="shape w-96 h-96 bg-emerald-400 top-20 left-10"></div>
         <div class="shape w-96 h-96 bg-blue-400 bottom-20 right-10" style="animation-delay: -5s"></div>
         
-        <div class="z-10">
+        <div class="z-10 mt-12">
             <h2 class="animate__animated animate__fadeInDown text-emerald-500 font-bold uppercase tracking-[0.6em] text-[10px] mb-6">Innovating Faith & Education</h2>
             <h1 class="animate__animated animate__zoomIn serif text-7xl md:text-[10rem] font-black italic text-slate-900 leading-[0.8] mb-8">
                 NUR <br> <span class="text-emerald-500">Portal.</span>
@@ -163,13 +143,46 @@
             <p class="animate__animated animate__fadeInUp animate__delay-1s text-slate-400 max-w-xl mx-auto text-lg md:text-xl font-medium mb-12">
                 "Knowledge, Faith, and Technology in Harmony." Crafted for the global community by Muhammad Rizwan.
             </p>
-            <div class="animate__animated animate__fadeInUp animate__delay-1s flex flex-wrap justify-center gap-6">
+            <div class="animate__animated animate__fadeInUp animate__delay-1s flex flex-wrap justify-center gap-6 items-center">
                 <a href="#biography" class="px-12 py-5 bg-slate-900 text-white rounded-2xl font-black shadow-2xl hover:scale-105 transition">The Journey</a>
                 <a href="https://education-point-360.github.io/NUR/" class="px-12 py-5 bg-white border border-slate-200 rounded-2xl font-black hover:border-emerald-500 transition">Nur AI Engine</a>
+            </div>
+
+            <!-- Integrated Unified Login & Sync Dashboard Widget -->
+            <div id="nur-auth-widget" class="p-5 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-white/10 max-w-sm mx-auto mt-12 shadow-2xl text-left">
+                <div id="auth-logged-out" class="space-y-4">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                        <p class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Cloud Sync Gateway</p>
+                        <div class="flex gap-2 text-[10px] font-bold uppercase">
+                            <button id="tab-login-btn" onclick="toggleAuthMode('login')" class="text-emerald-400 border-b border-emerald-400 pb-0.5">Sign In</button>
+                            <button id="tab-register-btn" onclick="toggleAuthMode('register')" class="text-slate-400">Sign Up</button>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <input type="email" id="auth-email" placeholder="Email Address" class="w-full text-xs p-2.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-emerald-500">
+                        <input type="password" id="auth-pass" placeholder="Password" class="w-full text-xs p-2.5 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+
+                    <button id="auth-submit-btn" onclick="handleCoreAuthAction()" class="w-full py-2.5 bg-emerald-500 text-black font-bold text-xs rounded-lg shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition">
+                        Sign In & Sync Data
+                    </button>
+                </div>
+                
+                <div id="auth-logged-in" class="hidden flex justify-between items-center">
+                    <div>
+                        <p class="text-[10px] font-bold text-emerald-400 tracking-widest uppercase">CONNECTED PROFILE</p>
+                        <h4 id="auth-user-name" class="text-sm font-bold text-white">Seeker</h4>
+                    </div>
+                    <button onclick="window.NurCore.triggerLogout()" class="px-3 py-1.5 border border-red-500/30 text-red-400 text-[11px] font-bold rounded-lg bg-red-500/10 hover:bg-red-500 hover:text-white transition">
+                        Disconnect
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
+    <!-- Live Parameters Synchronizer Bar -->
     <section class="py-16 bg-slate-900 relative">
         <div class="max-w-4xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 text-center">
             <div class="reveal">
@@ -183,286 +196,175 @@
         </div>
     </section>
 
-    <style>
-    /* Glassmorphism Classes - Clear/White Theme */
-    .glass-card-light {
-        background: rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-    }
-    
-    .glass-btn-light {
-        background: rgba(255, 255, 255, 0.5);
-        backdrop-filter: blur(5px);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        transition: all 0.3s ease;
-    }
-    .glass-btn-light:hover {
-        background: rgba(255, 255, 255, 0.8);
-        transform: translateY(-2px);
-    }
+    <!-- Biography & Roadmap Timelines -->
+    <section id="biography" class="relative py-40 bg-white overflow-hidden">
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none">
+            <i class="fa-solid fa-kaaba text-[30rem] absolute -top-20 -left-20 text-emerald-200"></i>
+            <i class="fa-solid fa-graduation-cap text-[30rem] absolute -bottom-20 -right-20 text-amber-200"></i>
+        </div>
 
-    /* Modern Timeline Rail styling */
-    .timeline-path-light {
-        position: absolute;
-        left: 50%;
-        top: 0;
-        bottom: 0;
-        width: 4px;
-        background: rgba(226, 232, 240, 0.5); /* Slate-200, but lighter */
-        transform: translateX(-50%);
-        overflow: hidden;
-    }
-    
-    #timeline-progress-light {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 0%;
-        background: linear-gradient(to bottom, #10b981, #06b6d4, #f59e0b); /* Emerald to Cyan to Amber */
-        transition: height 0.3s ease-out;
-        box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
-    }
+        <div class="timeline-path-light"><div id="timeline-progress-light"></div></div>
 
-    /* Checkpoint Node Styling */
-    .timeline-node-light {
-        position: absolute;
-        left: 50%;
-        width: 20px;
-        height: 20px;
-        background: white;
-        border: 4px solid #e2e8f0; /* Slate-200 */
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 10;
-        transition: all 0.6s ease;
-    }
-    .timeline-node-light.active {
-        border-color: #10b981; /* Emerald */
-        box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
-    }
-
-    /* Scroll Reveal - Clip-path "wipe" effect */
-    .reveal-wipe {
-        opacity: 0;
-        clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%);
-        transition: all 1.2s cubic-bezier(0.77, 0, 0.175, 1);
-    }
-    .reveal-wipe.active {
-        opacity: 1;
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
-    }
-
-    @media (max-width: 1024px) {
-        .timeline-path-light, .timeline-node-light { display: none; }
-    }
-</style>
-
-<section id="biography" class="relative py-40 bg-white overflow-hidden">
-    <div class="absolute inset-0 opacity-[0.03] pointer-events-none">
-        <i class="fa-solid fa-kaaba text-[30rem] absolute -top-20 -left-20 text-emerald-200"></i>
-        <i class="fa-solid fa-graduation-cap text-[30rem] absolute -bottom-20 -right-20 text-amber-200"></i>
-    </div>
-
-    <div class="timeline-path-light"><div id="timeline-progress-light"></div></div>
-
-    <div class="max-w-6xl mx-auto px-6 space-y-48 lg:space-y-80 relative">
-        
-        <div class="reveal-wipe flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative">
-            <div class="timeline-node-light lg:block hidden top-1/2" id="node-1"></div>
+        <div class="max-w-6xl mx-auto px-6 space-y-48 lg:space-y-80 relative">
             
-            <div class="w-full lg:w-1/2 flex justify-center">
+            <!-- Block 1 -->
+            <div class="reveal-wipe flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative">
+                <div class="timeline-node-light lg:block hidden top-1/2" id="node-1"></div>
+                
+                <div class="w-full lg:w-1/2 flex justify-center">
+                    <div class="relative group">
+                        <div class="absolute -inset-4 bg-emerald-500 rounded-[5rem] opacity-10 blur-2xl group-hover:opacity-20 transition duration-700"></div>
+                        <div class="relative w-64 h-64 lg:w-96 lg:h-96 bg-white p-6 rounded-[5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] flex items-center justify-center border border-slate-100 group-hover:border-emerald-200 transition duration-500">
+                            <i class="fa-solid fa-user-graduate text-[10rem] text-slate-100 group-hover:scale-105 group-hover:text-emerald-50 transition duration-500"></i>
+                            <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-3xl flex items-center justify-center text-white text-4xl shadow-xl animate-bounce"><i class="fa-solid fa-award"></i></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
+                    <div class="inline-block px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">The Founder Profile</div>
+                    <h3 class="serif text-5xl lg:text-7xl font-black italic text-slate-900 leading-none">Muhammad Rizwan</h3>
+                    <div class="space-y-6 text-slate-600 text-lg leading-relaxed">
+                        <p>Muhammad Rizwan is a dedicated student and passionate knowledge seeker with a vision to empower others through education and Islamic awareness. Since his early days, he has been committed to creating resources that are accessible, informative, and engaging.</p>
+                        <p class="font-bold text-slate-900 border-l-4 border-emerald-500 pl-4">Achievements & Contributions:</p>
+                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm font-medium pt-2">
+                            <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> Founder of NUR and Education Point</li>
+                            <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> AI Resource Developer</li>
+                            <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> Islamic Content Creator</li>
+                            <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> Learning Advocate</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block 2 -->
+            <div class="reveal-wipe flex flex-col-reverse lg:flex-row items-center gap-16 lg:gap-32 relative">
+                <div class="timeline-node-light lg:block hidden top-1/2" id="node-2"></div>
+                
+                <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
+                    <div class="inline-block px-4 py-1.5 bg-cyan-50 text-cyan-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">The Platform</div>
+                    <h3 class="serif text-5xl lg:text-7xl font-black italic text-slate-900 leading-none">The NUR <br>Portal</h3>
+                    <p class="text-emerald-500 font-black italic text-xl">"Knowledge, Faith, and Technology in Harmony"</p>
+                    <p class="text-slate-600 text-lg leading-relaxed">NUR is a comprehensive Islamic and educational portal designed to provide students and learners with easy access to authentic knowledge. It blends modern technology with traditional Islamic teachings.</p>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6 pt-6">
+                        <div class="glass-card-light p-6 rounded-3xl hover:border-cyan-400 hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
+                            <i class="fa-solid fa-book-quran text-3xl text-cyan-500 mb-4 block"></i>
+                            <h6 class="text-slate-800 font-bold text-xs">Quran Hub</h6>
+                        </div>
+                        <div class="glass-card-light p-6 rounded-3xl hover:border-cyan-400 hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
+                            <i class="fa-solid fa-robot text-3xl text-cyan-500 mb-4 block"></i>
+                            <h6 class="text-slate-800 font-bold text-xs">AI Tools</h6>
+                        </div>
+                        <div class="glass-card-light p-6 rounded-3xl hover:border-cyan-400 hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
+                            <i class="fa-solid fa-mosque text-3xl text-cyan-500 mb-4 block"></i>
+                            <h6 class="text-slate-800 font-bold text-xs">Prayer Guide</h6>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="w-full lg:w-1/2 flex justify-center">
+                    <div class="w-72 h-72 lg:w-[32rem] lg:h-[32rem] bg-slate-900 rounded-[6rem] shadow-2xl flex items-center justify-center relative overflow-hidden group border border-slate-700">
+                        <div class="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition duration-700"></div>
+                        <i class="fa-solid fa-moon text-[10rem] lg:text-[15rem] text-transparent bg-clip-text bg-gradient-to-t from-emerald-400 to-cyan-400 group-hover:scale-110 transition duration-700 z-10"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block 3 -->
+            <div class="reveal-wipe flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative">
+                <div class="timeline-node-light lg:block hidden top-1/2" id="node-3"></div>
+                
+                <div class="w-full lg:w-1/2 flex justify-center">
+                    <div class="relative p-12 lg:p-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[5rem] shadow-[0_30px_60px_rgba(245,158,11,0.2)] text-white overflow-hidden group">
+                        <i class="fa-solid fa-graduation-cap text-[8rem] lg:text-[15rem] opacity-10 absolute bottom-10 right-10 group-hover:rotate-12 transition-transform duration-700"></i>
+                        <h4 class="text-4xl lg:text-6xl font-black italic mb-8 relative z-10">Empowering <br>Global <br>Learners.</h4>
+                        <div class="flex items-center gap-4 relative z-10">
+                            <div class="w-12 h-1 bg-white rounded-full"></div>
+                            <p class="font-bold text-xs uppercase tracking-widest">Education Point</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
+                    <div class="inline-block px-4 py-1.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">The Mission</div>
+                    <h3 class="serif text-5xl lg:text-7xl font-black italic text-slate-900 leading-none">Education <br>Point</h3>
+                    <p class="text-slate-600 text-lg leading-relaxed">Purpose: A hub for educational excellence, offering curated content, tutorials, and interactive tools for students across various subjects. Successfully launched multiple interactive learning sections, including Quran, Hadith, AI tools, Namaz, Tasbeeh, and Azkhar.</p>
+                    
+                    <div class="p-8 glass-card-light rounded-3xl border border-slate-100 shadow-xl group hover:border-amber-300 hover:shadow-2xl hover:bg-white transition-all duration-500 relative overflow-hidden">
+                        <div class="absolute left-0 top-0 w-1 h-full bg-amber-500 rounded-l-3xl"></div>
+                        <p class="font-bold italic text-slate-800 text-xl group-hover:text-slate-900 transition-colors">"To empower students and learners to excel academically while maintaining strong spiritual and moral values."</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Floating Adaptive Staggered App Launcher Dock -->
+        <div class="fixed right-6 bottom-6 z-[9999] flex flex-col items-end gap-3" id="menu-container">
+            <div id="menu-items" class="flex flex-col gap-3 pointer-events-none opacity-0 translate-y-12 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
                 <div class="relative group">
-                    <div class="absolute -inset-4 bg-emerald-500 rounded-[5rem] opacity-10 blur-2xl group-hover:opacity-20 transition duration-700"></div>
-                    <div class="relative w-64 h-64 lg:w-96 lg:h-96 bg-white p-6 rounded-[5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] flex items-center justify-center border border-slate-100 group-hover:border-emerald-200 transition duration-500">
-                        <i class="fa-solid fa-user-graduate text-[10rem] text-slate-100 group-hover:scale-105 group-hover:text-emerald-50 transition duration-500"></i>
-                        <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-3xl flex items-center justify-center text-white text-4xl shadow-xl animate-bounce"><i class="fa-solid fa-award"></i></div>
-                    </div>
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+                    <a href="https://edupointai.netlify.app" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
+                        <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
+                            <span class="block text-[7px] uppercase tracking-[0.2em] text-blue-400 font-black">AI System</span>
+                            <span class="text-sm font-bold text-white">EduPoint <span class="text-blue-500">AI</span></span>
+                        </div>
+                        <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-blue-600 transition-all duration-300">
+                            <i class="fa-solid fa-microchip text-blue-500 group-hover:text-black text-base"></i>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="relative group">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-400 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+                    <a href="https://nurislumic.netlify.app" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
+                        <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
+                            <span class="block text-[7px] uppercase tracking-[0.2em] text-emerald-400 font-black">Spiritual</span>
+                            <span class="text-sm font-bold text-white">Nur <span class="text-emerald-500">Islam</span></span>
+                        </div>
+                        <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-emerald-500 transition-all duration-300">
+                            <i class="fa-solid fa-kaaba text-emerald-500 group-hover:text-black text-base"></i>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="relative group">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+                    <a href="https://rizwanep.netlify.app/" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
+                        <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
+                            <span class="block text-[7px] uppercase tracking-[0.2em] text-purple-400 font-black">Developer</span>
+                            <span class="text-sm font-bold text-white">M. <span class="text-purple-500">Rizwan</span></span>
+                        </div>
+                        <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-purple-600 transition-all duration-300">
+                            <i class="fa-solid fa-user-tie text-purple-500 group-hover:text-black text-base"></i>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="relative group">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+                    <a href="https://educationpoint360.netlify.app/" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
+                        <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
+                            <span class="block text-[7px] uppercase tracking-[0.2em] text-amber-400 font-black">Learning Hub</span>
+                            <span class="text-sm font-bold text-white">EduPoint <span class="text-amber-500">360</span></span>
+                        </div>
+                        <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-amber-500 transition-all duration-300">
+                            <i class="fa-solid fa-graduation-cap text-amber-500 group-hover:text-black text-base"></i>
+                        </div>
+                    </a>
                 </div>
             </div>
-            
-            <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
-                <div class="inline-block px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">The Founder Profile</div>
-                <h3 class="serif text-5xl lg:text-7xl font-black italic text-slate-900 leading-none">Muhammad Rizwan</h3>
-                <div class="space-y-6 text-slate-600 text-lg leading-relaxed">
-                    <p>Muhammad Rizwan is a dedicated student and passionate knowledge seeker with a vision to empower others through education and Islamic awareness. Since his early days, he has been committed to creating resources that are accessible, informative, and engaging.</p>
-                    <p class="font-bold text-slate-900 border-l-4 border-emerald-500 pl-4">Achievements & Contributions:</p>
-                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm font-medium pt-2">
-                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> Founder of NUR and Education Point</li>
-                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> AI Resource Developer</li>
-                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> Islamic Content Creator</li>
-                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-circle-check text-emerald-500 text-base"></i> Learning Advocate</li>
-                    </ul>
-                </div>
-            </div>
+
+            <button onclick="toggleMenu()" id="menu-trigger" class="relative group flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-black shadow-2xl transition-all duration-500 active:scale-90">
+                <div class="absolute -inset-1 bg-white/30 rounded-2xl blur-md group-hover:opacity-100 opacity-0 transition-opacity"></div>
+                <i id="menu-icon" class="fa-solid fa-plus text-xl transition-transform duration-500"></i>
+            </button>
         </div>
+    </section>
 
-        <div class="reveal-wipe flex flex-col-reverse lg:flex-row items-center gap-16 lg:gap-32 relative">
-            <div class="timeline-node-light lg:block hidden top-1/2" id="node-2"></div>
-            
-            <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
-                <div class="inline-block px-4 py-1.5 bg-cyan-50 text-cyan-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">The Platform</div>
-                <h3 class="serif text-5xl lg:text-7xl font-black italic text-slate-900 leading-none">The NUR <br>Portal</h3>
-                <p class="text-emerald-500 font-black italic text-xl">"Knowledge, Faith, and Technology in Harmony"</p>
-                <p class="text-slate-600 text-lg leading-relaxed">NUR is a comprehensive Islamic and educational portal designed to provide students and learners with easy access to authentic knowledge. It blends modern technology with traditional Islamic teachings.</p>
-                
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-6 pt-6">
-                    <div class="glass-card-light p-6 rounded-3xl hover:border-cyan-400 hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
-                        <i class="fa-solid fa-book-quran text-3xl text-cyan-500 mb-4 block"></i>
-                        <h6 class="text-slate-800 font-bold text-xs">Quran Hub</h6>
-                    </div>
-                    <div class="glass-card-light p-6 rounded-3xl hover:border-cyan-400 hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
-                        <i class="fa-solid fa-robot text-3xl text-cyan-500 mb-4 block"></i>
-                        <h6 class="text-slate-800 font-bold text-xs">AI Tools</h6>
-                    </div>
-                    <div class="glass-card-light p-6 rounded-3xl hover:border-cyan-400 hover:-translate-y-2 transition-all duration-300 text-center flex flex-col items-center">
-                        <i class="fa-solid fa-mosque text-3xl text-cyan-500 mb-4 block"></i>
-                        <h6 class="text-slate-800 font-bold text-xs">Prayer Guide</h6>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="w-full lg:w-1/2 flex justify-center">
-                <div class="w-72 h-72 lg:w-[32rem] lg:h-[32rem] bg-slate-900 rounded-[6rem] shadow-2xl flex items-center justify-center relative overflow-hidden group border border-slate-700">
-                    <div class="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition duration-700"></div>
-                    <i class="fa-solid fa-moon text-[10rem] lg:text-[15rem] text-transparent bg-clip-text bg-gradient-to-t from-emerald-400 to-cyan-400 group-hover:scale-110 transition duration-700 z-10"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="reveal-wipe flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative">
-            <div class="timeline-node-light lg:block hidden top-1/2" id="node-3"></div>
-            
-            <div class="w-full lg:w-1/2 flex justify-center">
-                <div class="relative p-12 lg:p-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-[5rem] shadow-[0_30px_60px_rgba(245,158,11,0.2)] text-white overflow-hidden group">
-                    <i class="fa-solid fa-graduation-cap text-[8rem] lg:text-[15rem] opacity-10 absolute bottom-10 right-10 group-hover:rotate-12 transition-transform duration-700"></i>
-                    <h4 class="text-4xl lg:text-6xl font-black italic mb-8 relative z-10">Empowering <br>Global <br>Learners.</h4>
-                    <div class="flex items-center gap-4 relative z-10">
-                        <div class="w-12 h-1 bg-white rounded-full"></div>
-                        <p class="font-bold text-xs uppercase tracking-widest">Education Point</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
-                <div class="inline-block px-4 py-1.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">The Mission</div>
-                <h3 class="serif text-5xl lg:text-7xl font-black italic text-slate-900 leading-none">Education <br>Point</h3>
-                <p class="text-slate-600 text-lg leading-relaxed">Purpose: A hub for educational excellence, offering curated content, tutorials, and interactive tools for students across various subjects. Successfully launched multiple interactive learning sections, including Quran, Hadith, AI tools, Namaz, Tasbeeh, and Azkhar.</p>
-                
-                <div class="p-8 glass-card-light rounded-3xl border border-slate-100 shadow-xl group hover:border-amber-300 hover:shadow-2xl hover:bg-white transition-all duration-500 relative overflow-hidden">
-                    <div class="absolute left-0 top-0 w-1 h-full bg-amber-500 rounded-l-3xl"></div>
-                    <p class="font-bold italic text-slate-800 text-xl group-hover:text-slate-900 transition-colors">"To empower students and learners to excel academically while maintaining strong spiritual and moral values."</p>
-                </div>
-            </div>
-        </div>
-
-    </div>
-	<div class="fixed right-6 bottom-6 z-[9999] flex flex-col items-end gap-3" id="menu-container">
-    
-    <div id="menu-items" class="flex flex-col gap-3 pointer-events-none opacity-0 translate-y-12 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
-        
-        <div class="relative group">
-            <div class="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
-            <a href="https://edupointai.netlify.app" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
-                <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
-                    <span class="block text-[7px] uppercase tracking-[0.2em] text-blue-400 font-black">AI System</span>
-                    <span class="text-sm font-bold text-white">EduPoint <span class="text-blue-500">AI</span></span>
-                </div>
-                <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-blue-600 transition-all duration-300">
-                    <i class="fa-solid fa-microchip text-blue-500 group-hover:text-black text-base"></i>
-                </div>
-            </a>
-        </div>
-
-        <div class="relative group">
-            <div class="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-400 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
-            <a href="https://nurislamic.netlify.app" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
-                <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
-                    <span class="block text-[7px] uppercase tracking-[0.2em] text-emerald-400 font-black">Spiritual</span>
-                    <span class="text-sm font-bold text-white">Nur <span class="text-emerald-500">Islam</span></span>
-                </div>
-                <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-emerald-500 transition-all duration-300">
-                    <i class="fa-solid fa-kaaba text-emerald-500 group-hover:text-black text-base"></i>
-                </div>
-            </a>
-        </div>
-
-        <div class="relative group">
-            <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
-            <a href="https://rizwanep.netlify.app/" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
-                <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
-                    <span class="block text-[7px] uppercase tracking-[0.2em] text-purple-400 font-black">Developer</span>
-                    <span class="text-sm font-bold text-white">M. <span class="text-purple-500">Rizwan</span></span>
-                </div>
-                <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-purple-600 transition-all duration-300">
-                    <i class="fa-solid fa-user-tie text-purple-500 group-hover:text-black text-base"></i>
-                </div>
-            </a>
-        </div>
-
-        <div class="relative group">
-            <div class="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
-            <a href="https://educationpoint360.netlify.app/" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden shadow-2xl">
-                <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap">
-                    <span class="block text-[7px] uppercase tracking-[0.2em] text-amber-400 font-black">Learning Hub</span>
-                    <span class="text-sm font-bold text-white">EduPoint <span class="text-amber-500">360</span></span>
-                </div>
-                <div class="relative flex h-12 w-12 shrink-0 items-center justify-center bg-zinc-900/50 group-hover:bg-amber-500 transition-all duration-300">
-                    <i class="fa-solid fa-graduation-cap text-amber-500 group-hover:text-black text-base"></i>
-                </div>
-            </a>
-        </div>
-
-    </div>
-
-    <button onclick="toggleMenu()" id="menu-trigger" class="relative group flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-black shadow-2xl transition-all duration-500 active:scale-90">
-        <div class="absolute -inset-1 bg-white/30 rounded-2xl blur-md group-hover:opacity-100 opacity-0 transition-opacity"></div>
-        <i id="menu-icon" class="fa-solid fa-plus text-xl transition-transform duration-500"></i>
-    </button>
-
-</div>
-
-<style>
-    /* Toggle States */
-    .menu-open #menu-items {
-        opacity: 1 !important;
-        transform: translateY(0) !important;
-        pointer-events: auto !important;
-    }
-    
-    .menu-open #menu-icon {
-        transform: rotate(135deg);
-    }
-
-    /* Apple Staggered Animation (Bottom to Top) */
-    #menu-items > div:nth-child(4) { transition-delay: 0.05s; }
-    #menu-items > div:nth-child(3) { transition-delay: 0.1s; }
-    #menu-items > div:nth-child(2) { transition-delay: 0.15s; }
-    #menu-items > div:nth-child(1) { transition-delay: 0.2s; }
-</style>
-
-<script>
-    function toggleMenu() {
-        const container = document.getElementById('menu-container');
-        container.classList.toggle('menu-open');
-    }
-    
-    // Optional: Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-        const container = document.getElementById('menu-container');
-        if (!container.contains(e.target) && container.classList.contains('menu-open')) {
-            container.classList.remove('menu-open');
-        }
-    });
-</script>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://cdn.tailwindcss.com"></script>
-	
-</section>
-	    <footer class="bg-slate-900 pt-24 pb-12 px-8 overflow-hidden relative">
+    <!-- Footer Grid Layout -->
+    <footer class="bg-slate-900 pt-24 pb-12 px-8 overflow-hidden relative">
         <div class="max-w-7xl mx-auto relative z-10 text-center md:text-left">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-20 mb-16 pb-16 border-b border-white/5">
                 <div class="space-y-6">
@@ -484,15 +386,73 @@
         </div>
     </footer>
 
+    <!-- Core Interactive Client-Side Automation Logic -->
     <script>
-        // --- 1. SILENT BACKGROUND NAMAZ ENGINE ---
+        let standardAuthMode = 'login'; // Can switch between 'login' and 'register'
+
+        function toggleAuthMode(mode) {
+            standardAuthMode = mode;
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const loginTab = document.getElementById('tab-login-btn');
+            const registerTab = document.getElementById('tab-register-btn');
+
+            if (mode === 'register') {
+                submitBtn.innerText = 'Sign Up & Create Profile';
+                registerTab.className = 'text-emerald-400 border-b border-emerald-400 pb-0.5';
+                loginTab.className = 'text-slate-400';
+            } else {
+                submitBtn.innerText = 'Sign In & Sync Data';
+                loginTab.className = 'text-emerald-400 border-b border-emerald-400 pb-0.5';
+                registerTab.className = 'text-slate-400';
+            }
+        }
+
+        async function handleCoreAuthAction() {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+
+            if(!email || !pass) {
+                alert("Please fill in all security parameter strings.");
+                return;
+            }
+
+            if (standardAuthMode === 'login') {
+                const { error } = await window.NurCore.triggerLogin(email, pass);
+                if (error) alert("Authentication Encountered an Error: " + error.message);
+            } else {
+                // If your Supabase instance allows direct registration via client code
+                if (window.NurCore.getClientInstance) {
+                    const supabase = window.NurCore.getClientInstance();
+                    if(supabase) {
+                        const { error } = await supabase.auth.signUp({ email, password: pass });
+                        if (error) alert("Registration Encountered an Error: " + error.message);
+                        else alert("Account verification request deployed successfully! Please verify your email inbox.");
+                    }
+                } else {
+                    alert("Custom registration modules require active Supabase client orchestration layers.");
+                }
+            }
+        }
+
+        // Monitor state synchronizations
+        window.addEventListener('nurStateSync', () => {
+            const user = window.NurCore.getSnapshot().user;
+            if (user && user.authenticated) {
+                document.getElementById('auth-logged-out').classList.add('hidden');
+                document.getElementById('auth-logged-in').classList.remove('hidden');
+                document.getElementById('auth-user-name').innerText = user.name;
+            } else {
+                document.getElementById('auth-logged-out').classList.remove('hidden');
+                document.getElementById('auth-logged-in').classList.add('hidden');
+            }
+        });
+
+        // --- BACKGROUND ALARMS ENGINE ---
         async function initNURAlarms() {
             if ('serviceWorker' in navigator && 'Notification' in window) {
                 const permission = await Notification.requestPermission();
                 if (permission !== 'granted') return;
 
-                await navigator.serviceWorker.register('sw.js');
-                
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     const { latitude, longitude } = pos.coords;
                     try {
@@ -518,7 +478,7 @@
             }
         }
 
-        // --- 2. SIDEBAR ENGINE ---
+        // --- SIDEBAR ENGINE ---
         function toggleSidebar(open) {
             const side = document.getElementById('sidebar');
             if(open) {
@@ -530,21 +490,17 @@
             }
         }
 
-        // --- 3. CLOCK & LOCATION ENGINE ---
+        // --- CLOCK & LOCATION ENGINE ---
         setInterval(() => {
             const clock = document.getElementById('clock');
             if(clock) clock.innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
         }, 1000);
 
         async function fetchDashboard() {
-            // 1. Read synchronized parameters from the core engine safely
             const coreSnapshot = window.NurCore ? window.NurCore.getSnapshot() : null;
             const lastRead = coreSnapshot ? coreSnapshot.readingHistory : null;
-            
-            // 2. Safely find or insert a persistent UI element into your design
             let targetContainer = document.getElementById('location')?.parentElement;
             
-            // Fixed: Added optional chaining (lastRead?.lastSurahName) to prevent crashing if history is empty
             if (targetContainer && lastRead && lastRead.lastSurahName) {
                 let historyWidget = document.getElementById('core-history-widget');
                 if (!historyWidget) {
@@ -561,7 +517,6 @@
                 `;
             }
 
-            // Keep your legacy location engine completely intact
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     try {
@@ -577,9 +532,8 @@
             }
         }
 
-        // --- 4. SCROLL REVEAL & PROGRESS ENGINE ---
+        // --- SCROLL REVEAL & PROGRESS ENGINE ---
         window.addEventListener('scroll', () => {
-            // Timeline Rail
             const winScroll = window.scrollY || document.documentElement.scrollTop;
             const height = document.documentElement.scrollHeight - window.innerHeight;
             const scrolled = (winScroll / height) * 100;
@@ -589,7 +543,6 @@
             if(prog) prog.style.height = scrolled + "%";
             if(progLight) progLight.style.height = scrolled + "%";
 
-            // Element Reveals
             document.querySelectorAll(".reveal, .reveal-wipe").forEach((el, index) => {
                 if (el.getBoundingClientRect().top < window.innerHeight - 100) {
                     el.classList.add("active");
@@ -599,10 +552,47 @@
             });
         });
 
+        function toggleMenu() {
+            const container = document.getElementById('menu-container');
+            container.classList.toggle('menu-open');
+        }
+        
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('menu-container');
+            if (container && !container.contains(e.target) && container.classList.contains('menu-open')) {
+                container.classList.remove('menu-open');
+            }
+        });
+
         // Initialize Everything
         window.addEventListener('load', () => {
             fetchDashboard();
             initNURAlarms();
+        });
+
+        // Safe Initialization Hook bindings
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.addEventListener('click', () => {
+                if (window.NurCore && window.NurCore.unlockAudio) {
+                    window.NurCore.unlockAudio();
+                }
+            }, { once: true });
+
+            const activeTimetable = {
+                Fajr: "04:45",
+                Dhuhr: "12:35",
+                Asr: "16:40",
+                Maghrib: "19:25",
+                Isha: "20:50"
+            };
+            
+            if (window.NurCore && window.NurCore.initializeAlarms) {
+                window.NurCore.initializeAlarms(activeTimetable);
+            }
+        });
+
+        window.addEventListener('nurAdhanTrigger', (e) => {
+            console.log(`[UI Update] Currently broadcasting audio stream for: ${e.detail.name}`);
         });
     </script>
 </body>
