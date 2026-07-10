@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
+    <!-- PWA Core Registration & Lifecycle Manager -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -45,6 +46,7 @@
         });
     </script>
 
+    <!-- REALTIME ARABIC/URDU NOTIFICATION SYSTEM & ENGINE -->
     <script>
         async function initRealtimeNotificationSystem() {
             if (!('Notification' in window)) return;
@@ -191,6 +193,7 @@
 </head>
 <body class="antialiased bg-[#fafafa]">
 
+    <!-- Glassmorphic Navigation -->
     <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-[100] glass rounded-3xl border border-white/20 px-6 py-4 flex justify-between items-center shadow-2xl">
         <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-emerald-400"><i class="fa-solid fa-bolt-lightning"></i></div>
@@ -207,6 +210,7 @@
         <button onclick="toggleSidebar(true)" class="lg:hidden text-xl"><i class="fa-solid fa-bars-staggered"></i></button>
     </nav>
 
+    <!-- Sidebar Menu Layer -->
     <div id="sidebar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[110] hidden opacity-0 transition-opacity">
         <div class="w-80 h-full bg-white ml-auto p-12 flex flex-col shadow-2xl">
             <button onclick="toggleSidebar(false)" class="self-end text-3xl mb-12 text-slate-300"><i class="fa-solid fa-xmark"></i></button>
@@ -221,6 +225,7 @@
         </div>
     </div>
 
+    <!-- Main App Header Base -->
     <header class="h-screen flex items-center justify-center text-center px-6 relative overflow-hidden bg-white">
         <div class="shape w-96 h-96 bg-emerald-400 top-20 left-10"></div>
         <div class="shape w-96 h-96 bg-blue-400 bottom-20 right-10" style="animation-delay: -5s"></div>
@@ -238,6 +243,7 @@
                 <a href="https://education-point-360.github.io/NUR/" class="px-12 py-5 bg-white border border-slate-200 rounded-2xl font-black hover:border-emerald-500 transition">Nur AI Engine</a>
             </div>
 
+            <!-- Integrated Unified Login & Sync Dashboard Widget -->
             <div id="nur-auth-widget" class="p-5 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-white/10 max-w-sm mx-auto mt-12 shadow-2xl text-left">
                 <div id="auth-logged-out" class="space-y-4">
                     <div class="flex justify-between items-center border-b border-white/10 pb-2">
@@ -271,6 +277,7 @@
         </div>
     </header>
 
+    <!-- Live Parameters Synchronizer Bar -->
     <section class="py-16 bg-slate-900 relative">
         <div class="max-w-4xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 text-center">
             <div class="reveal">
@@ -284,20 +291,24 @@
         </div>
     </section>
 
+    <!-- Biography & Roadmap Timelines -->
     <section id="biography" class="relative py-40 bg-white overflow-hidden">
         <div class="absolute inset-0 opacity-[0.03] pointer-events-none">
             <i class="fa-solid fa-kaaba text-[30rem] absolute -top-20 -left-20 text-emerald-200"></i>
             <i class="fa-solid fa-graduation-cap text-[30rem] absolute -bottom-20 -right-20 text-amber-200"></i>
         </div>
         
+        <!-- ISLAMIC OS PREMIUM REALTIME DASHBOARD -->
         <section id="islamic-os-dashboard" class="py-12 px-6 max-w-7xl mx-auto reveal animate__animated animate__fadeIn">
             <div class="text-center mb-10">
                 <h2 class="serif text-4xl md:text-5xl font-black text-slate-900">Spiritual <span class="text-emerald-500">Dashboard</span></h2>
                 <p class="text-slate-400 font-bold text-xs uppercase tracking-widest mt-2">موجودہ اسلامی سرگرمی اور لائیو ترقی</p>
             </div>
 
+            <!-- Bento Box Grid Structural Setup -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 
+                <!-- Box 1: Quran Analytics -->
                 <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
                     <div class="flex justify-between items-start">
                         <div class="w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-book-quran"></i></div>
@@ -310,6 +321,7 @@
                     <p id="db-last-surah" class="text-xs text-slate-500 mt-3 font-medium truncate">آخری بار پڑھا گیا: لوڈ ہو رہا ہے...</p>
                 </div>
 
+                <!-- Box 2: Prayer Tracker -->
                 <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
                     <div class="flex justify-between items-start">
                         <div class="w-10 h-10 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-mosque"></i></div>
@@ -328,6 +340,7 @@
                     </div>
                 </div>
 
+                <!-- Box 3: Hadith Analytics -->
                 <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
                     <div class="flex justify-between items-start">
                         <div class="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-book"></i></div>
@@ -339,6 +352,7 @@
                     <p id="db-last-hadith" class="text-xs text-slate-500 mt-3 font-medium truncate">کتاب: لوڈ ہو رہا ہے...</p>
                 </div>
 
+                <!-- Box 4: Tasbeeh Counter Metrics -->
                 <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
                     <div class="flex justify-between items-start">
                         <div class="w-10 h-10 bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-circle-dot"></i></div>
@@ -354,6 +368,7 @@
             </div>
         </section>
 
+        <!-- Dashboard Reactive Injector Script -->
         <script>
             function renderDashboardData() {
                 if (!window.NurCore) return;
@@ -402,6 +417,7 @@
 
         <div class="max-w-6xl mx-auto px-6 space-y-48 lg:space-y-80 relative">
             
+            <!-- Block 1 -->
             <div class="reveal-wipe flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative">
                 <div class="timeline-node-light lg:block hidden top-1/2" id="node-1"></div>
                 
@@ -431,6 +447,7 @@
                 </div>
             </div>
 
+            <!-- Block 2 -->
             <div class="reveal-wipe flex flex-col-reverse lg:flex-row items-center gap-16 lg:gap-32 relative">
                 <div class="timeline-node-light lg:block hidden top-1/2" id="node-2"></div>
                 
@@ -464,6 +481,7 @@
                 </div>
             </div>
 
+            <!-- Block 3 -->
             <div class="reveal-wipe flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative">
                 <div class="timeline-node-light lg:block hidden top-1/2" id="node-3"></div>
                 
@@ -492,6 +510,7 @@
 
         </div>
 
+        <!-- Floating Adaptive Staggered App Launcher Dock -->
         <div class="fixed right-6 bottom-6 z-[9999] flex flex-col items-end gap-3" id="menu-container">
             <div id="menu-items" class="flex flex-col gap-3 pointer-events-none opacity-0 translate-y-12 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
                 <div class="relative group">
@@ -554,6 +573,7 @@
         </div>
     </section>
 
+    <!-- Footer Grid Layout -->
     <footer class="bg-slate-900 pt-24 pb-12 px-8 overflow-hidden relative">
         <div class="max-w-7xl mx-auto relative z-10 text-center md:text-left">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-20 mb-16 pb-16 border-b border-white/5">
@@ -576,6 +596,7 @@
         </div>
     </footer>
 
+    <!-- Core Interactive Client-Side Automation Logic -->
     <script>
         let standardAuthMode = 'login'; // Can switch between 'login' and 'register'
 
