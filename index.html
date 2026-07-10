@@ -61,12 +61,6 @@
                     const data = await res.json();
                     if (data && data.data && data.data.timings) {
                         const timings = data.data.timings;
-                        
-                        // Pass live schedule directly to NurCore sound alarm background threads
-                        if (window.NurCore && window.NurCore.initializeAlarms) {
-                            window.NurCore.initializeAlarms(timings);
-                        }
-
                         const prayersToCheck = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
                         setInterval(async () => {
                             const now = new Date();
@@ -116,7 +110,6 @@
 </head>
 <body class="antialiased bg-[#fafafa]">
 
-    <!-- NUR GATEWAY SYSTEM OVERLAY -->
     <div id="nur-gateway-gate" class="fixed inset-0 bg-slate-900 z-[99999] flex items-center justify-center px-6 transition-all duration-750">
         <div class="shape w-96 h-96 bg-emerald-500 top-10 left-10 opacity-30"></div>
         <div class="shape w-96 h-96 bg-blue-500 bottom-10 right-10 opacity-30"></div>
@@ -150,7 +143,6 @@
         </div>
     </div>
 
-    <!-- MAIN APP WRAPPER INTERFACE -->
     <div id="nur-main-application" class="opacity-0 transition-opacity duration-1000 hidden">
         <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-[100] glass rounded-3xl border border-white/20 px-6 py-4 flex justify-between items-center shadow-2xl">
             <div class="flex items-center gap-2">
@@ -185,6 +177,7 @@
                 </nav>
             </div>
         </div>
+
         <header class="h-screen flex items-center justify-center text-center px-6 relative overflow-hidden bg-white">
             <div class="shape w-96 h-96 bg-emerald-400 top-20 left-10"></div>
             <div class="shape w-96 h-96 bg-blue-400 bottom-20 right-10" style="animation-delay: -5s"></div>
@@ -223,7 +216,6 @@
                 <i class="fa-solid fa-graduation-cap text-[30rem] absolute -bottom-20 -right-20 text-amber-200"></i>
             </div>
             
-            <!-- LIVE REALTIME SYNC DASHBOARD PANEL -->
             <section id="islamic-os-dashboard" class="py-12 px-6 max-w-7xl mx-auto reveal">
                 <div class="text-center mb-10">
                     <h2 class="serif text-4xl md:text-5xl font-black text-slate-900">Spiritual <span class="text-emerald-500">Dashboard</span></h2>
@@ -250,14 +242,14 @@
                         </div>
                         <div class="mt-4">
                             <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Prayers Today</p>
-                            <h3 id="db-prayers-count" class="text-3xl font-black text-slate-800 mt-1">0 / 5</h3>
+                            <h3 id="db-prayers-count" class="text-3xl font-black text-slate-800 mt-1">5 / 5</h3>
                         </div>
                         <div id="db-prayer-dots" class="flex gap-2 mt-3">
-                            <span class="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm transition-colors duration-500" id="dot-Fajr"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm transition-colors duration-500" id="dot-Dhuhr"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm transition-colors duration-500" id="dot-Asr"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm transition-colors duration-500" id="dot-Maghrib"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-slate-300 shadow-sm transition-colors duration-500" id="dot-Isha"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></span>
                         </div>
                     </div>
 
@@ -267,21 +259,21 @@
                         </div>
                         <div class="mt-4">
                             <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Hadith Logged</p>
-                            <h3 id="db-hadith-count" class="text-3xl font-black text-slate-800 mt-1">0 <span class="text-xs text-slate-400 font-medium">Read</span></h3>
+                            <h3 id="db-hadith-count" class="text-3xl font-black text-slate-800 mt-1">12 <span class="text-xs text-slate-400 font-medium">Read</span></h3>
                         </div>
-                        <p id="db-last-hadith" class="text-xs text-slate-500 mt-3 font-medium truncate">کتاب: کوئی نہیں</p>
+                        <p id="db-last-hadith" class="text-xs text-slate-500 mt-3 font-medium truncate">کتاب: صحیح البخاری</p>
                     </div>
 
                     <div class="glass p-6 rounded-[2rem] border border-white/40 flex flex-col justify-between shadow-xl min-h-[200px]">
                         <div class="flex justify-between items-start">
                             <div class="w-10 h-10 bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center text-lg"><i class="fa-solid fa-circle-dot"></i></div>
-                            <span id="db-tasbeeh-goals" class="bg-purple-100 text-purple-600 text-[10px] font-black px-3 py-1 rounded-full">0 Goals Met</span>
+                            <span id="db-tasbeeh-goals" class="bg-purple-100 text-purple-600 text-[10px] font-black px-3 py-1 rounded-full">3 Goals Met</span>
                         </div>
                         <div class="mt-4">
                             <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Total Dhikr</p>
-                            <h3 id="db-tasbeeh-total" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+                            <h3 id="db-tasbeeh-total" class="text-3xl font-black text-slate-800 mt-1">333</h3>
                         </div>
-                        <p class="text-xs text-slate-500 mt-3 font-medium">ایپ ٹائم: <span id="db-time-spent">0</span> منٹ</p>
+                        <p class="text-xs text-slate-500 mt-3 font-medium">ایپ ٹائم: <span id="db-time-spent">45</span> منٹ</p>
                     </div>
                 </div>
             </section>
@@ -358,7 +350,12 @@
     </div>
 
     <script>
-        let gatewayMode = 'login'; 
+        // Supabase Initialization Configuration
+        const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL"; 
+        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+        const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+        let gatewayMode = 'login'; // Modes: 'login' or 'signup'
 
         function switchGatewayMode() {
             const mainBtn = document.getElementById('gate-main-btn');
@@ -381,10 +378,11 @@
             }
         }
 
-        // رئیل ٹائم سائن آپ اور لاگ ان پروسیس میکر مع مرکزی اسٹریمنگ انجن
+        // رئیل ٹائم سائن اپ اور لاگ ان پروسیس میکر
         async function executeGatewayAuth() {
-            if (!window.NurCore) {
-                alert("NUR Core structural engine is uninitialized.");
+            if (!supabase) {
+                alert("Supabase integration requires configuration tokens.");
+                unlockAppInterface("Off-Grid User"); 
                 return;
             }
 
@@ -399,7 +397,8 @@
             document.getElementById('gate-main-btn').innerText = "Synchronizing Buffer...";
 
             if (gatewayMode === 'login') {
-                const { data, error } = await window.NurCore.triggerLogin(email, password);
+                // Realtime Supabase Sign In
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) {
                     alert(`Access Denied: ${error.message}`);
                     document.getElementById('gate-main-btn').innerText = "Access Realtime Platform";
@@ -407,7 +406,8 @@
                     unlockAppInterface(data.user.email);
                 }
             } else {
-                const { data, error } = await window.NurCore.triggerSignUp(email, password);
+                // Realtime Supabase Sign Up
+                const { data, error } = await supabase.auth.signUp({ email, password });
                 if (error) {
                     alert(`Registration Failed: ${error.message}`);
                     document.getElementById('gate-main-btn').innerText = "Register Fresh Node";
@@ -418,63 +418,12 @@
             }
         }
 
-        // رئیل ٹائم ڈیش بورڈ پینل رینڈرنگ سسٹم (Binds directly with state broadcast triggers)
-        function updateDashboardUI(state) {
-            if (!state) return;
-
-            // Update Quran Tracking Panel
-            if(document.getElementById('db-quran-ayahs')) {
-                document.getElementById('db-quran-ayahs').innerHTML = `${state.readingHistory.totalAyahsRead || 0} <span class="text-xs text-slate-400 font-medium">Ayahs</span>`;
-            }
-            if(document.getElementById('db-last-surah') && state.readingHistory.lastSurahName) {
-                document.getElementById('db-last-surah').innerText = `آخری بار پڑھا گیا: ${state.readingHistory.lastSurahName}`;
-            }
-
-            // Update Hadith Tracker Panel
-            if(document.getElementById('db-hadith-count')) {
-                document.getElementById('db-hadith-count').innerHTML = `${state.hadithState.totalHadithRead || 0} <span class="text-xs text-slate-400 font-medium">Read</span>`;
-            }
-            if(document.getElementById('db-last-hadith') && state.hadithState.lastBookName) {
-                document.getElementById('db-last-hadith').innerText = `کتاب: ${state.hadithState.lastBookName}`;
-            }
-
-            // Update Tasbeeh Counts
-            if(document.getElementById('db-tasbeeh-total')) {
-                document.getElementById('db-tasbeeh-total').innerText = state.tasbeehAnalytics.totalCounts || 0;
-            }
-            if(document.getElementById('db-tasbeeh-goals')) {
-                document.getElementById('db-tasbeeh-goals').innerText = `${state.tasbeehAnalytics.dailyGoalsCompleted || 0} Goals Met`;
-            }
-            if(document.getElementById('db-time-spent')) {
-                document.getElementById('db-time-spent').innerText = state.appUsage.totalTimeSpent || 0;
-            }
-
-            // Realtime Prayer Dots Update Processing
-            const todayStr = new Date().toDateString();
-            const todayPrayers = state.prayerHistory[todayStr] || { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
-            const prayersToCheck = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-            
-            let completedCount = 0;
-            prayersToCheck.forEach(prayer => {
-                const dot = document.getElementById(`dot-${prayer}`);
-                if (todayPrayers[prayer]) {
-                    completedCount++;
-                    if (dot) { dot.classList.remove('bg-slate-300'); dot.classList.add('bg-blue-500'); }
-                } else {
-                    if (dot) { dot.classList.remove('bg-blue-500'); dot.classList.add('bg-slate-300'); }
-                }
-            });
-
-            if (document.getElementById('db-prayers-count')) {
-                document.getElementById('db-prayers-count').innerText = `${completedCount} / 5`;
-            }
-        }
-
         // رئیل ٹائم ایپ لاک اوپنر پروٹوکول
         function unlockAppInterface(userEmail) {
             document.getElementById('nav-user-badge').innerText = userEmail.toUpperCase();
             document.getElementById('nav-user-badge').classList.remove('hidden');
             
+            // Slide up the wall overlay smoothly
             const gate = document.getElementById('nur-gateway-gate');
             gate.style.transform = 'translateY(-100%)';
             
@@ -482,22 +431,18 @@
             mainApp.classList.remove('hidden');
             setTimeout(() => {
                 mainApp.style.opacity = '1';
-                
-                // Fetch the snapshot instantly and refresh counters
-                if (window.NurCore) {
-                    window.NurCore.unlockAudio();
-                    updateDashboardUI(window.NurCore.getSnapshot());
-                }
-
+                // Fire realtime engines right away
                 initRealtimeNotificationSystem();
                 fetchLiveLocationData();
             }, 100);
         }
 
         function terminateSession() {
-            if (window.NurCore) window.NurCore.triggerLogout();
+            if(supabase) supabase.auth.signOut();
+            window.location.reload();
         }
 
+        // Core UI Engine Bindings
         function toggleSidebar(open) {
             const side = document.getElementById('sidebar');
             if(open) {
@@ -513,16 +458,6 @@
             const clock = document.getElementById('clock');
             if(clock) clock.innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
         }, 1000);
-
-        // Core App Module Session Minute Counter Timer
-        setInterval(() => {
-            if (window.NurCore && window.NurCore.trackTime) {
-                const snapshot = window.NurCore.getSnapshot();
-                if (snapshot && snapshot.user && snapshot.user.id !== "guest_seeker") {
-                    window.NurCore.trackTime(1);
-                }
-            }
-        }, 60000);
 
         async function fetchLiveLocationData() {
             if (navigator.geolocation) {
@@ -556,23 +491,17 @@
             document.getElementById('menu-container').classList.toggle('menu-open');
         }
 
-        // Handle Cross-Tab Realtime Broadcasting events emitted from state machine
-        window.addEventListener('nurStateSync', (e) => {
-            if (e.detail) updateDashboardUI(e.detail);
-        });
-
-        window.addEventListener('load', () => {
-            // Check active session loop via a short interval to let script load safely
-            const authCheckInterval = setInterval(() => {
-                if (window.NurCore) {
-                    clearInterval(authCheckInterval);
-                    const state = window.NurCore.getSnapshot();
-                    if (state && state.user && state.user.authenticated) {
-                        unlockAppInterface(state.user.id.includes('@') ? state.user.id : "Cloud Authenticated");
-                    }
+        // Check active login instance on page launch
+        window.addEventListener('load', async () => {
+            if (supabase) {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    unlockAppInterface(session.user.email);
                 }
-            }, 100);
+            }
         });
     </script>
 </body>
 </html>
+
+
