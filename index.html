@@ -189,6 +189,16 @@
                                 <div class="w-9 h-9 bg-blue-500/10 text-blue-600 rounded-xl flex items-center justify-center text-base"><i class="fa-solid fa-mosque"></i></div>
                                 <h3 id="db-prayers-count" class="text-lg font-black text-slate-800">0 / 5</h3>
                             </div>
+                            <div>
+                                <p class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Prayers Logged</p>
+                                <div id="db-prayer-dots" class="flex gap-2 mt-2">
+                                    <span data-prayer="Fajr" class="w-2.5 h-2.5 rounded-full bg-slate-200 transition-colors duration-300"></span>
+                                    <span data-prayer="Dhuhr" class="w-2.5 h-2.5 rounded-full bg-slate-200 transition-colors duration-300"></span>
+                                    <span data-prayer="Asr" class="w-2.5 h-2.5 rounded-full bg-slate-200 transition-colors duration-300"></span>
+                                    <span data-prayer="Maghrib" class="w-2.5 h-2.5 rounded-full bg-slate-200 transition-colors duration-300"></span>
+                                    <span data-prayer="Isha" class="w-2.5 h-2.5 rounded-full bg-slate-200 transition-colors duration-300"></span>
+                                </div>
+                            </div>
                             <span class="text-[9px] text-blue-500 font-black tracking-wide uppercase mt-1"><i class="fa-solid fa-circle-check mr-1"></i>Active Tracking</span>
                         </div>
 
@@ -329,29 +339,7 @@
 
                 </div>
 
-                <!-- Complete Timetable Linear Layout -->
-                <div id="prayer-timetable-row" class="grid grid-cols-5 gap-3 text-center">
-                    <div class="bg-white/5 border border-white/5 p-4 rounded-2xl hover:bg-white/10 transition group" data-timetable-p="Fajr">
-                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-1 group-hover:text-emerald-400 transition">Fajr</p>
-                        <h5 class="font-mono text-sm font-bold text-white tracking-wide">--:--</h5>
-                    </div>
-                    <div class="bg-white/5 border border-white/5 p-4 rounded-2xl hover:bg-white/10 transition group" data-timetable-p="Dhuhr">
-                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-1 group-hover:text-emerald-400 transition">Dhuhr</p>
-                        <h5 class="font-mono text-sm font-bold text-white tracking-wide">--:--</h5>
-                    </div>
-                    <div class="bg-white/5 border border-white/5 p-4 rounded-2xl hover:bg-white/10 transition group" data-timetable-p="Asr">
-                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-1 group-hover:text-emerald-400 transition">Asr</p>
-                        <h5 class="font-mono text-sm font-bold text-white tracking-wide">--:--</h5>
-                    </div>
-                    <div class="bg-white/5 border border-white/5 p-4 rounded-2xl hover:bg-white/10 transition group" data-timetable-p="Maghrib">
-                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-1 group-hover:text-emerald-400 transition">Maghrib</p>
-                        <h5 class="font-mono text-sm font-bold text-white tracking-wide">--:--</h5>
-                    </div>
-                    <div class="bg-white/5 border border-white/5 p-4 rounded-2xl hover:bg-white/10 transition group" data-timetable-p="Isha">
-                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider mb-1 group-hover:text-emerald-400 transition">Isha</p>
-                        <h5 class="font-mono text-sm font-bold text-white tracking-wide">--:--</h5>
-                    </div>
-                </div>
+    
 
             </div>
         </section>
