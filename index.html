@@ -13,10 +13,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
     <script>
+        // Enhanced Service Worker Registration for Background Audio & Notifications
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then((reg) => {
-                    console.log('[NUR PWA] Core Engine Registered:', reg.scope);
+                    console.log('[NUR PWA] Background Engine & Notification Hub Registered:', reg.scope);
+                    
+                    // Periodic Sync for Daily Ayah/Hadith Notifications when App is closed
+                    if ('periodicSync' in reg) {
+                        reg.periodicSync.register('daily-spiritual-sync', {
+                            minInterval: 24 * 60 * 60 * 1000 // Every 24 hours
+                        }).catch(err => console.log("Periodic Sync failed, fallback initialized."));
+                    }
                 }).catch((err) => console.error('[NUR PWA] Registration Failed:', err));
             });
         }
@@ -110,6 +118,10 @@
                 <a href="tabeeh.html" class="px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-emerald-500 transition shadow-md">Tasbeeh</a>
             </div>
             <div class="flex items-center gap-3">
+                <!-- Notifications Toggle Button -->
+                <button onclick="requestSystemNotificationAccess()" id="system-bell-btn" class="w-9 h-9 bg-slate-100 hover:bg-emerald-50 text-slate-600 rounded-xl flex items-center justify-center transition shadow-sm border border-slate-200/50">
+                    <i class="fa-solid fa-bell animate-pulse"></i>
+                </button>
                 <button onclick="toggleProfileModal(true)" class="flex items-center gap-2 bg-slate-100/80 hover:bg-emerald-50 text-slate-700 px-3 py-1.5 rounded-xl border border-slate-200/50 transition duration-300">
                     <div class="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm">
                         <i class="fa-solid fa-user text-[9px]"></i>
@@ -449,7 +461,7 @@
                         <p class="text-slate-400 text-xs mt-2 font-medium leading-relaxed">Authentic daily morning, evening supplications mapped directly to specific timeline triggers.</p>
                     </a>
 
-                    <a href="tabeeh.html" class="glass-card p-8 rounded-3xl block group hover:border-emerald-500/60 transition shadow-sm hover:scale-[1.01]">
+                    <a href="tabeeh.html" class="glass-card p-8 rounded-3xl block group group-hover:border-emerald-500/60 transition shadow-sm hover:scale-[1.01]">
                         <div class="w-12 h-12 bg-slate-900 text-emerald-400 rounded-2xl flex items-center justify-center text-xl mb-6 shadow-md transition group-hover:bg-emerald-500 group-hover:text-white"><i class="fa-solid fa-circle-dot"></i></div>
                         <h4 class="serif text-xl font-black text-slate-900 group-hover:text-emerald-600 transition">Digital Tasbeeh Counter</h4>
                         <p class="text-slate-400 text-xs mt-2 font-medium leading-relaxed">Immersive dhikr logging array engine supporting daily target setup counters seamlessly.</p>
@@ -517,6 +529,8 @@
     <script>
         let gatewayMode = 'login';
         let prayerAlarmsBuffer = {};
+        let backgroundAzanAudio = null;
+        let lastNotifiedPrayer = "";
 
         window.addEventListener('load', () => {
             window.addEventListener('nurStateSync', (e) => {
@@ -533,6 +547,22 @@
             initLiveGreetingEngine();
             fetchStaticAyahAndHadith();
         });
+
+        async function requestSystemNotificationAccess() {
+            if ('Notification' in window) {
+                const permission = await Notification.requestPermission();
+                const bell = document.getElementById('system-bell-btn');
+                if (permission === 'granted') {
+                    bell.innerHTML = '<i class="fa-solid fa-bell text-emerald-500"></i>';
+                    new Notification("NUR Hub Enabled", {
+                        body: "Spiritual Push Engine & Background Azan Nodes Synced Successfully.",
+                        icon: "logo.png"
+                    });
+                } else {
+                    bell.innerHTML = '<i class="fa-solid fa-bell-slash text-red-500"></i>';
+                }
+            }
+        }
 
         function toggleProfileModal(show) {
             const modal = document.getElementById('profile-modal');
@@ -616,7 +646,7 @@
             setTimeout(() => {
                 mainApp.style.opacity = '1';
                 window.NurCore.unlockAudio();
-                initRealtimeNotificationSystem();
+                requestSystemNotificationAccess();
                 fetchLiveLocationData();
             }, 100);
 
@@ -700,6 +730,7 @@
                 const now = new Date();
                 clock.innerText = now.toLocaleTimeString('en-US', { hour12: false });
                 calculateRealtimeCountdownLoop();
+                checkAndTriggerBackgroundAlarms(now);
             }
         }, 1000);
 
@@ -741,6 +772,14 @@
                     }
 
                     window.NurCore.initializeAlarms(prayerAlarmsBuffer);
+
+                    // Sync time array directly to service worker data store for persistent closed-app alarms
+                    if(navigator.serviceWorker.controller) {
+                        navigator.serviceWorker.controller.postMessage({
+                            type: 'SYNC_PRAYER_TIMES',
+                            times: prayerAlarmsBuffer
+                        });
+                    }
                 }
             } catch (err) { console.error("Timetable Sync Error:", err); }
         }
@@ -795,9 +834,38 @@
             if(activeCell) activeCell.classList.add('bg-emerald-500/10', 'border-emerald-500/30');
         }
 
+        // Realtime Foreground Alarm Trigger System
+        function checkAndTriggerBackgroundAlarms(now) {
+            if(Object.keys(prayerAlarmsBuffer).length === 0) return;
+            const currentTimeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+            
+            for(const prayer in prayerAlarmsBuffer) {
+                if(prayerAlarmsBuffer[prayer] === currentTimeStr && lastNotifiedPrayer !== prayer) {
+                    lastNotifiedPrayer = prayer;
+                    triggerAzanAlarmCore(prayer);
+                }
+            }
+        }
+
+        function triggerAzanAlarmCore(prayerName) {
+            // 1. Send System Push Notification
+            if (Notification.permission === 'granted') {
+                new Notification(`Time for ${prayerName}`, {
+                    body: `حی علی الصلاة - It's time to gather for ${prayerName} prayer.`,
+                    icon: 'logo.png',
+                    requireInteraction: true
+                });
+            }
+
+            // 2. Play Audio Node
+            if(!backgroundAzanAudio) {
+                backgroundAzanAudio = new Audio('azan.mp3');
+            }
+            backgroundAzanAudio.play().catch(e => console.log("Audio waiting for user click interaction vector."));
+        }
+
         async function fetchStaticAyahAndHadith() {
             try {
-                // Fetch dynamic Ayah Of the day
                 const ayahRes = await fetch('https://api.alquran.cloud/v1/ayah/255/editions/quran-simple,en.sahih,ur.jandali');
                 const ayahData = await ayahRes.json();
                 if(ayahData && ayahData.data) {
@@ -807,7 +875,6 @@
                     document.getElementById('ayah-reference-node').innerText = `${ayahData.data[0].surah.name} : ${ayahData.data[0].numberInSurah}`;
                 }
                 
-                // Static Fallback translation display arrays for Premium Clean Interface
                 document.getElementById('hadith-arabic-node').innerText = "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى";
                 document.getElementById('hadith-english-node').innerText = "The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended.";
                 document.getElementById('hadith-urdu-node').innerText = "اعمال کا دارومدار نیتوں پر ہے، اور ہر انسان کو وہی ملے گا جس کی اس نے نیت کی ہو گی۔";
@@ -827,10 +894,6 @@
 
         function bookmarkContentData(type) {
             alert("Node entry saved directly inside local buffer profile arrays.");
-        }
-
-        async function initRealtimeNotificationSystem() {
-            if ('Notification' in window) await Notification.requestPermission();
         }
 
         function toggleSidebar(open) {
