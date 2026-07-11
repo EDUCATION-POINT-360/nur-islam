@@ -505,18 +505,23 @@
 
     <!-- Core Pipeline Scripts Binding Interface -->
     <script>
-    // --- Global State & Configuration ---
+    // Configuration & State
     let gatewayMode = 'login';
     let prayerAlarmsBuffer = {};
     let backgroundAzanAudio = null;
     let lastNotifiedPrayer = "";
 
-    // --- Initialization ---
+    // 1. App Initialization
     window.addEventListener('load', () => {
-        // Core Integration Sync
+        // Core listeners
         window.addEventListener('nurStateSync', (e) => renderStateToDashboard(e.detail));
         
-        // Auth Check
+        // Audio Unlocking
+        document.body.addEventListener('click', () => {
+            if(window.NurCore) window.NurCore.unlockAudio();
+        }, { once: true });
+
+        // Session Restoration
         const currentSnapshot = window.NurCore ? window.NurCore.getSnapshot() : null;
         const localAuthToken = localStorage.getItem('nur_authenticated_user');
         
@@ -524,17 +529,11 @@
             unlockAppInterface(localAuthToken || (currentSnapshot.user.name || currentSnapshot.user.id));
         }
         
-        // UI & Content Setup
         initLiveGreetingEngine();
         fetchStaticAyahAndHadith();
-        
-        // Audio Unlocking (Requirement: User interaction)
-        document.body.addEventListener('click', () => {
-            if (window.NurCore) window.NurCore.unlockAudio();
-        }, { once: true });
     });
 
-    // --- Gateway & Authentication Logic ---
+    // 2. Gateway/Auth Logic
     function switchGatewayMode() {
         const mainBtn = document.getElementById('gate-main-btn');
         const switchBtn = document.getElementById('gate-switch-btn');
@@ -592,50 +591,42 @@
     function unlockAppInterface(identityBadge) {
         document.documentElement.classList.add('session-active');
         const truncated = identityBadge.split('@')[0];
-        
         document.getElementById('nav-user-badge').innerText = truncated.toUpperCase();
         document.getElementById('prof-display-name').innerText = identityBadge.includes('@') ? truncated : identityBadge;
         document.getElementById('prof-display-email').innerText = identityBadge.includes('@') ? identityBadge : "offline-local.node@nur.com";
-        
         document.getElementById('nur-gateway-gate').style.transform = 'translateY(-100%)';
+        
         const mainApp = document.getElementById('nur-main-application');
         mainApp.classList.remove('hidden');
-        
         setTimeout(() => {
             mainApp.style.opacity = '1';
             if(window.NurCore) window.NurCore.unlockAudio();
             requestSystemNotificationAccess();
             fetchLiveLocationData();
         }, 100);
-
-        if(window.NurCore) renderStateToDashboard(window.NurCore.getSnapshot());
     }
 
-    // --- Prayer, Location, and Notification Logic ---
+    // 3. Spiritual Content & Location
     async function requestSystemNotificationAccess() {
         if ('Notification' in window) {
             const permission = await Notification.requestPermission();
             const bell = document.getElementById('system-bell-btn');
-            if (permission === 'granted') {
-                bell.innerHTML = '<i class="fa-solid fa-bell text-emerald-500"></i>';
-            } else {
-                bell.innerHTML = '<i class="fa-solid fa-bell-slash text-red-500"></i>';
-            }
+            if (bell) bell.innerHTML = permission === 'granted' ? '<i class="fa-solid fa-bell text-emerald-500"></i>' : '<i class="fa-solid fa-bell-slash text-red-500"></i>';
         }
     }
 
     async function fetchLiveLocationData() {
-        const success = (pos) => {
-            const { latitude: lat, longitude: lng } = pos.coords;
-            setupLivePrayerAlarms(lat, lng);
-            fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
-                .then(res => res.json())
-                .then(data => document.getElementById('location').innerText = `${data.city || 'Active Node'}, ${data.countryCode}`)
-                .catch(() => document.getElementById('location').innerText = "Wan Bhachran, PK");
-        };
-        
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(success, () => {
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                try {
+                    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+                    const data = await res.json();
+                    document.getElementById('location').innerText = `${data.city || data.locality || 'Active Node'}, ${data.countryCode}`;
+                } catch (e) { document.getElementById('location').innerText = "Wan Bhachran, PK"; }
+                setupLivePrayerAlarms(lat, lng);
+            }, () => {
                 document.getElementById('location').innerText = "Wan Bhachran, PK";
                 setupLivePrayerAlarms(32.6114, 71.3917);
             });
@@ -647,29 +638,34 @@
             const res = await fetch(`https://api.aladhan.com/v1/timings/${Math.floor(Date.now() / 1000)}?latitude=${lat}&longitude=${lng}&method=4`);
             const data = await res.json();
             if (data?.data?.timings) {
-                const t = data.data.timings;
-                prayerAlarmsBuffer = { Fajr: t.Fajr, Dhuhr: t.Dhuhr, Asr: t.Asr, Maghrib: t.Maghrib, Isha: t.Isha };
-                
-                // Update UI nodes
+                prayerAlarmsBuffer = data.data.timings;
                 document.getElementById('live-hijri-date').innerText = `${data.data.date.hijri.day} ${data.data.date.hijri.month.en} ${data.data.date.hijri.year} AH`;
                 document.getElementById('live-gregorian-date').innerText = data.data.date.gregorian.date;
                 
-                for(const key in prayerAlarmsBuffer) {
-                    const cell = document.querySelector(`[data-timetable-p="${key}"] h5`);
-                    if(cell) cell.innerText = prayerAlarmsBuffer[key];
-                }
-
                 if(window.NurCore) window.NurCore.initializeAlarms(prayerAlarmsBuffer);
             }
         } catch (err) { console.error("Timetable Sync Error:", err); }
     }
 
+    // 4. Realtime Monitoring Loop
+    setInterval(() => {
+        const now = new Date();
+        const clock = document.getElementById('clock');
+        if(clock) clock.innerText = now.toLocaleTimeString('en-US', { hour12: false });
+        
+        calculateRealtimeCountdownLoop();
+        checkAndTriggerBackgroundAlarms(now);
+    }, 1000);
+
     function checkAndTriggerBackgroundAlarms(now) {
         if(Object.keys(prayerAlarmsBuffer).length === 0) return;
-        const cur = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        const currentH = now.getHours().toString().padStart(2,'0');
+        const currentM = now.getMinutes().toString().padStart(2,'0');
+        const currentTimeStr = `${currentH}:${currentM}`;
         
         for(const prayer in prayerAlarmsBuffer) {
-            if(prayerAlarmsBuffer[prayer] === cur && lastNotifiedPrayer !== prayer) {
+            const [pH, pM] = prayerAlarmsBuffer[prayer].split(':');
+            if(pH === currentH && pM === currentM && lastNotifiedPrayer !== prayer) {
                 lastNotifiedPrayer = prayer;
                 
                 if (Notification.permission === 'granted') {
@@ -677,78 +673,59 @@
                 }
                 
                 if(window.NurCore) window.NurCore.playManualAdhan(prayer.toLowerCase() === 'fajr' ? 'fajr' : 'standard');
+                if(!backgroundAzanAudio) backgroundAzanAudio = new Audio('azan.mp3');
+                backgroundAzanAudio.play().catch(e => console.log("Audio waiting for interaction."));
             }
         }
     }
 
-    // --- Recurring Loops ---
-    setInterval(() => {
-        const now = new Date();
-        const clock = document.getElementById('clock');
-        if(clock) clock.innerText = now.toLocaleTimeString('en-US', { hour12: false });
-        
-        if(Object.keys(prayerAlarmsBuffer).length > 0) {
-            calculateRealtimeCountdownLoop();
-            checkAndTriggerBackgroundAlarms(now);
-        }
-    }, 1000);
-
-    // --- Helper Functions ---
     function calculateRealtimeCountdownLoop() {
+        if(Object.keys(prayerAlarmsBuffer).length === 0) return;
         const now = new Date();
         const prayerOrder = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-        const timeToMin = (t) => { const [h, m] = t.split(':'); return parseInt(h) * 60 + parseInt(m); };
+        let currentPrayer = "Isha", nextPrayer = "Fajr";
+        const timeToMin = (t) => { const p = t.split(':'); return parseInt(p[0]) * 60 + parseInt(p[1]); };
         const currentMin = now.getHours() * 60 + now.getMinutes();
 
-        let currentPrayer = "Isha";
-        let nextPrayer = "Fajr";
-        
         for(let i=0; i<prayerOrder.length; i++) {
             if(currentMin >= timeToMin(prayerAlarmsBuffer[prayerOrder[i]])) {
                 currentPrayer = prayerOrder[i];
                 nextPrayer = prayerOrder[(i + 1) % prayerOrder.length];
             }
         }
-
+        
         document.getElementById('live-current-prayer').innerText = currentPrayer;
         document.getElementById('live-next-prayer-name').innerText = nextPrayer;
         document.getElementById('live-next-prayer-time').innerText = prayerAlarmsBuffer[nextPrayer];
         
-        // Countdown math
-        let target = new Date();
-        const [th, tm] = prayerAlarmsBuffer[nextPrayer].split(':');
-        target.setHours(th, tm, 0);
-        if(nextPrayer === 'Fajr' && currentMin > 720) target.setDate(target.getDate() + 1);
-        
-        let diff = Math.max(0, target - now);
-        const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-        const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-        const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-        document.getElementById('live-countdown-timer').innerText = `${h}:${m}:${s}`;
+        // Update styling
+        document.querySelectorAll('[data-timetable-p]').forEach(el => el.classList.remove('bg-emerald-500/10'));
+        const active = document.querySelector(`[data-timetable-p="${currentPrayer}"]`);
+        if(active) active.classList.add('bg-emerald-500/10');
     }
 
+    // 5. Utility & Static Content
     async function fetchStaticAyahAndHadith() {
         try {
             const res = await fetch('https://api.alquran.cloud/v1/ayah/255/editions/quran-simple,en.sahih,ur.jandali');
             const data = await res.json();
-            if(data?.data) {
-                document.getElementById('ayah-arabic-node').innerText = data.data[0].text;
-                document.getElementById('ayah-english-node').innerText = data.data[1].text;
-                document.getElementById('ayah-urdu-node').innerText = data.data[2].text;
-            }
-        } catch(e) { console.error("Content load error"); }
-    }
-
-    function initLiveGreetingEngine() {
-        const hour = new Date().getHours();
-        document.getElementById('greeting-text').innerText = hour < 12 ? "Sabah Al-Khair | Assalamu Alaikum" : (hour < 17 ? "Masa Al-Khair | Assalamu Alaikum" : "Blessed Evening | Assalamu Alaikum");
+            document.getElementById('ayah-arabic-node').innerText = data.data[0].text;
+            document.getElementById('ayah-urdu-node').innerText = data.data[2].text;
+        } catch(e) {}
     }
 
     function renderStateToDashboard(state) {
         if (!state) return;
-        // Dashboard DOM updates...
+        // Dashboard DOM Updates (e.g., counters, streaks)
+    }
+
+    function terminateSession() {
+        localStorage.removeItem('nur_authenticated_user');
+        if(window.NurCore) window.NurCore.triggerLogout();
+        window.location.reload();
     }
 </script>
+
 </body>
 </html>
 
