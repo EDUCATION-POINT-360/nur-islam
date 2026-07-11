@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NUR | The Digital Light</title>
+    <title>NOOR | Premium Islamic Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="nur-core.js"></script>
@@ -12,733 +12,748 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Amiri:wght@400;700&family=Playfair+Display:ital,wght@0,900;1,900&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+    <script>
+        // Session Pre-Check: Prevent login screen flashing if already authenticated
+        (function() {
+            const savedUser = localStorage.getItem('nur_authenticated_user') || localStorage.getItem('supabase.auth.token');
+            if (savedUser) {
+                document.documentElement.classList.add('session-active');
+            }
+        })();
+    </script>
 
-        :root { --emerald: #10b981; --slate-900: #0f172a; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fafafa; color: var(--slate-900); overflow-x: hidden; }
-        .serif { font-family: 'Playfair Display', serif; }
-        .urdu { font-family: 'Noto Nastaliq Urdu', 'Amiri', serif; line-height: 2.5; }
-        .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.4); }
-        .shape { position: absolute; filter: blur(80px); opacity: 0.15; z-index: -1; animation: pulse 10s infinite alternate; }
-        @keyframes pulse { 0% { transform: scale(1) translate(0, 0); } 100% { transform: scale(1.2) translate(50px, 50px); } }
-        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .profile-glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.6); }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&family=Cinzel:wght@600;700;900&display=swap');
+        
+        :root { 
+            --emerald-primary: #059669; 
+            --emerald-glow: #10b981; 
+            --dark-base: #090d16; 
+        }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #06090f; 
+            color: #f3f4f6;
+            overflow-x: hidden; 
+        }
+        
+        .serif-islamic { font-family: 'Amiri', serif; }
+        .display-title { font-family: 'Cinzel', serif; }
+        
+        /* Premium Realism & Glassmorphism Blur Mechanics */
+        .premium-glass { 
+            background: rgba(15, 23, 42, 0.45); 
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px); 
+            border: 1px solid rgba(255, 255, 255, 0.06); 
+        }
+        .premium-card {
+            background: rgba(20, 30, 54, 0.3);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .premium-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 12px 40px -12px rgba(16, 185, 129, 0.15);
+        }
+        
+        /* Dynamic Atmospheric Ambient Lighting */
+        .ambient-glow { 
+            position: absolute; 
+            filter: blur(140px); 
+            opacity: 0.08; 
+            z-index: -1; 
+            pointer-events: none;
+        }
+        
+        .session-active #nur-gateway-gate { display: none !important; }
+        .session-active #nur-main-application { display: block !important; opacity: 1 !important; }
+        
+        /* Smooth Custom Progress Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #06090f; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--emerald-glow); }
     </style>
 </head>
-<body class="antialiased bg-[#fafafa]">
+<body class="antialiased selection:bg-emerald-500/30 selection:text-emerald-300">
 
-    <!-- Main Workspace -->
-    <div id="nur-main-application">
+    <!-- Auth Gateway Screen Overlay -->
+    <div id="nur-gateway-gate" class="fixed inset-0 bg-[#090d16] z-[99999] flex items-center justify-center px-6 transition-all duration-700">
+        <div class="ambient-glow w-96 h-96 bg-emerald-500 top-10 left-10 opacity-20"></div>
+        <div class="ambient-glow w-96 h-96 bg-blue-500 bottom-10 right-10 opacity-20"></div>
         
-        <!-- Navigation Bar -->
-        <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[92%] max-w-6xl z-[100] glass rounded-3xl px-6 py-4 flex justify-between items-center shadow-2xl">
+        <div class="w-full max-w-md bg-white/[0.02] backdrop-blur-3xl border border-white/5 p-8 rounded-[2.5rem] shadow-2xl text-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-4 shadow-xl shadow-emerald-500/10">
+                <i class="fa-solid fa-bolt-lightning text-white"></i>
+            </div>
+            <h2 class="display-title text-4xl font-black text-white tracking-wider">NOOR <span class="text-emerald-400">Gateway</span></h2>
+            <p id="gateway-msg" class="text-[10px] text-slate-400 font-bold tracking-widest uppercase mt-2 border-b border-white/5 pb-4">Secure Realtime Cloud Sync</p>
+            
+            <div class="space-y-3 mt-6 text-left">
+                <div id="name-field-container" class="hidden transition-all duration-300">
+                    <label class="text-[10px] font-black uppercase tracking-wider text-slate-400 pl-1">Full Name</label>
+                    <input type="text" id="gate-name" placeholder="Your Name" class="w-full mt-1 p-3.5 rounded-xl bg-slate-950/60 border border-white/5 text-white text-sm focus:outline-none focus:border-emerald-400 transition">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-wider text-slate-400 pl-1">Cloud Sync Identity</label>
+                    <input type="email" id="gate-email" placeholder="name@domain.com" class="w-full mt-1 p-3.5 rounded-xl bg-slate-950/60 border border-white/5 text-white text-sm focus:outline-none focus:border-emerald-400 transition">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase tracking-wider text-slate-400 pl-1">Security String</label>
+                    <input type="password" id="gate-pass" placeholder="••••••••" class="w-full mt-1 p-3.5 rounded-xl bg-slate-950/60 border border-white/5 text-white text-sm focus:outline-none focus:border-emerald-400 transition">
+                </div>
+            </div>
+
+            <button id="gate-main-btn" onclick="executeGatewayAuth()" class="w-full mt-6 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm rounded-xl transition shadow-lg shadow-emerald-500/10">
+                Access Live Platform
+            </button>
+
+            <button id="gate-guest-btn" onclick="bypassAuthAsGuest()" class="w-full mt-2 py-2 bg-transparent text-slate-400 font-bold text-xs rounded-xl hover:text-white transition">
+                Explore as Guest (Local Node)
+            </button>
+
+            <p class="text-xs text-slate-500 mt-6 font-medium">
+                <span id="gate-switch-text">Don't have an account?</span> 
+                <button onclick="switchGatewayMode()" id="gate-switch-btn" class="text-emerald-400 font-bold ml-1 underline">Create Node</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Application Canvas -->
+    <div id="nur-main-application" class="opacity-0 transition-opacity duration-1000 hidden relative">
+        <div class="ambient-glow w-[50vw] h-[50vh] bg-emerald-500 top-[-10vh] left-[-10vw]"></div>
+        <div class="ambient-glow w-[40vw] h-[40vh] bg-teal-600 top-[80vh] right-[-10vw]"></div>
+
+        <!-- Header Navigation -->
+        <nav class="fixed top-6 left-1/2 -translate-x-1/2 w-[92%] max-w-6xl z-[100] premium-glass rounded-2xl px-6 py-4 flex justify-between items-center shadow-2xl">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-emerald-400"><i class="fa-solid fa-bolt-lightning"></i></div>
-                <span class="text-xl font-black italic tracking-tighter">NUR<span class="text-emerald-500">.</span></span>
+                <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center text-white shadow-md"><i class="fa-solid fa-moon"></i></div>
+                <span class="display-title text-xl font-black tracking-widest text-white">NOOR<span class="text-emerald-400">.</span></span>
             </div>
             <div class="hidden lg:flex gap-8 font-bold text-[10px] uppercase tracking-widest text-slate-400 items-center">
-                <a href="quran.html" class="hover:text-emerald-500 transition">Quran</a>
-                <a href="hadees.html" class="hover:text-emerald-500 transition">Hadith</a>
-                <a href="https://education-point-360.github.io/NUR/" class="hover:text-emerald-500 transition">AI Tools</a>
-                <a href="adkhar.html" class="hover:text-emerald-500 transition">Adkhar</a>
-                <a href="namaz.html" class="px-5 py-2 bg-slate-900 text-white rounded-xl hover:bg-emerald-500 transition shadow-xl">Prayer Hub</a>
-                <a href="tabeeh.html" class="px-5 py-2 bg-slate-900 text-white rounded-xl hover:bg-emerald-500 transition shadow-xl">Tasbeeh</a>
+                <a href="quran.html" class="hover:text-emerald-400 transition">Quran</a>
+                <a href="hadees.html" class="hover:text-emerald-400 transition">Hadith</a>
+                <a href="https://education-point-360.github.io/NUR/" class="hover:text-emerald-400 transition">AI Engine</a>
+                <a href="adkhar.html" class="hover:text-emerald-400 transition">Adkhar</a>
+                <a href="namaz.html" class="hover:text-emerald-400 transition">Prayer Hub</a>
+                <a href="tabeeh.html" class="hover:text-emerald-400 transition">Tasbeeh</a>
             </div>
             <div class="flex items-center gap-3">
-                <div id="hijri-nav-display" class="hidden md:block text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200/50">LOADING DATE...</div>
-                
-                <button onclick="openProfileGateway()" class="flex items-center gap-2 bg-slate-100 hover:bg-emerald-50 text-slate-700 px-4 py-2 rounded-xl border border-slate-200/50 transition duration-300">
-                    <div class="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm">
-                        <i class="fa-solid fa-user text-[9px]"></i>
+                <button onclick="toggleProfileModal(true)" class="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl border border-white/5 transition">
+                    <div class="w-4 h-4 bg-emerald-500 text-slate-950 rounded-full flex items-center justify-center text-[9px] font-black" id="nav-profile-avatar">
+                        <i class="fa-solid fa-user"></i>
                     </div>
-                    <span id="nav-user-badge" class="text-[10px] font-black tracking-wider">PROFILE</span>
+                    <span id="nav-user-badge" class="text-[10px] font-black tracking-widest text-slate-200">SYNCING...</span>
                 </button>
-                <button onclick="toggleSidebar(true)" class="lg:hidden text-xl ml-1"><i class="fa-solid fa-bars-staggered"></i></button>
+                <button onclick="terminateSession()" class="text-xs font-black text-rose-500 hover:text-rose-400 transition ml-2"><i class="fa-solid fa-power-off"></i></button>
+                <button onclick="toggleSidebar(true)" class="lg:hidden text-xl text-white ml-2"><i class="fa-solid fa-bars-staggered"></i></button>
             </div>
         </nav>
 
-        <!-- Dynamic Unified Profile & Dashboard Modal -->
-        <div id="profile-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-lg z-[9999] hidden items-center justify-center p-4 transition-all duration-300">
-            <div class="w-full max-w-4xl profile-glass rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/40 flex flex-col md:flex-row h-full max-h-[85vh] md:max-h-[75vh] animate__animated animate__zoomIn animate__fast">
+        <!-- Profile Modal Workspace Dashboard -->
+        <div id="profile-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[999] hidden items-center justify-center p-4 transition-all duration-300">
+            <div class="w-full max-w-4xl premium-glass rounded-[2rem] shadow-2xl overflow-hidden border border-white/10 flex flex-col md:flex-row max-h-[90vh] md:max-h-[80vh] animate__animated animate__zoomIn animate__fast">
                 
-                <!-- Close Button for Mobile -->
-                <button onclick="toggleProfileModal(false)" class="absolute top-4 right-4 z-50 w-8 h-8 bg-white/10 text-white rounded-full flex items-center justify-center md:hidden"><i class="fa-solid fa-xmark"></i></button>
-
-                <!-- LEFT SIDE PANEL: Auth Form OR User Profile Info Summary -->
-                <div id="modal-left-panel" class="w-full md:w-1/3 bg-slate-900 p-8 text-white flex flex-col justify-between items-center text-center relative overflow-y-auto">
-                    <!-- Auth View Layout Container -->
-                    <div id="modal-auth-container" class="w-full my-auto space-y-4">
-                        <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-black text-xl font-black mx-auto mb-2 shadow-lg shadow-emerald-500/20">
-                            <i class="fa-solid fa-lock"></i>
+                <!-- Left Details Banner -->
+                <div class="w-full md:w-1/3 bg-slate-950/40 p-8 text-center flex flex-col justify-between items-center border-b md:border-b-0 md:border-r border-white/5 relative">
+                    <button onclick="toggleProfileModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl md:hidden"><i class="fa-solid fa-xmark"></i></button>
+                    <div class="w-full">
+                        <div class="relative w-20 h-20 mx-auto mb-4">
+                            <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full opacity-40 blur animate-pulse"></div>
+                            <div class="relative w-full h-full bg-slate-900 rounded-full border border-white/10 flex items-center justify-center">
+                                <i class="fa-solid fa-user-shield text-3xl text-emerald-400"></i>
+                            </div>
                         </div>
-                        <h4 id="auth-title" class="serif text-xl font-black text-white">Cloud Sync Entry</h4>
-                        <p id="auth-desc" class="text-[10px] text-slate-400 uppercase tracking-wider">Sync with Nur Core Pipeline</p>
+                        <h4 id="prof-display-name" class="display-title text-xl font-bold text-white tracking-wide">Faith Seeker</h4>
+                        <p id="prof-display-email" class="text-xs text-slate-500 tracking-wide truncate max-w-full px-2 mt-1">seeker@noor.com</p>
                         
-                        <div class="space-y-2 text-left pt-2">
-                            <div id="auth-name-wrapper" class="hidden">
-                                <label class="text-[9px] font-black uppercase text-slate-300 pl-1">Full Name</label>
-                                <input type="text" id="auth-name" placeholder="Name" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-emerald-400">
-                            </div>
-                            <div>
-                                <label class="text-[9px] font-black uppercase text-slate-300 pl-1">Cloud Email</label>
-                                <input type="email" id="auth-email" placeholder="email@domain.com" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-emerald-400">
-                            </div>
-                            <div>
-                                <label class="text-[9px] font-black uppercase text-slate-300 pl-1">Password</label>
-                                <input type="password" id="auth-pass" placeholder="••••••••" class="w-full mt-1 p-3 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-emerald-400">
-                            </div>
+                        <div class="mt-6 inline-flex bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-1.5 items-center gap-2">
+                            <i class="fa-solid fa-fire text-amber-500"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Streak: <span id="prof-streak-val">1 Day</span></span>
                         </div>
-                        <button onclick="handleAuthAction()" id="auth-submit-btn" class="w-full py-3 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-xs rounded-xl shadow-md transition">Access Workspace</button>
-                        <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-[11px] text-emerald-400 font-bold underline block mx-auto pt-2">Create New Node Account</button>
                     </div>
-
-                    <!-- Profile Info View Layout Container -->
-                    <div id="modal-info-container" class="w-full hidden space-y-6">
-                        <div>
-                            <div class="relative w-20 h-20 mx-auto mb-3">
-                                <div class="absolute -inset-1 bg-emerald-400 rounded-full opacity-60 blur animate-pulse"></div>
-                                <div class="relative w-full h-full bg-slate-800 rounded-full flex items-center justify-center border border-emerald-400">
-                                    <i class="fa-solid fa-user-shield text-3xl text-emerald-400"></i>
-                                </div>
-                            </div>
-                            <h4 id="prof-name" class="serif text-xl font-black text-white">Verified Seeker</h4>
-                            <p id="prof-email" class="text-[11px] text-slate-400 truncate px-2 mt-0.5">offline@nur.com</p>
-                        </div>
-
-                        <div class="bg-white/5 border border-white/10 rounded-2xl p-4 text-center shadow-inner">
-                            <i class="fa-solid fa-fire text-amber-500 text-lg animate-bounce mb-1 block"></i>
-                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-300 block">Daily Streak Node</span>
-                            <span id="prof-streak" class="text-xl font-extrabold text-emerald-400 block mt-0.5">1 Active Day</span>
-                        </div>
-
-                        <div class="border-t border-white/10 pt-4 space-y-2 text-xs text-left">
-                            <div class="flex justify-between text-slate-400"><span class="font-bold">Active Stream:</span><span class="text-white font-mono"><span id="prof-time">0</span> Min</span></div>
-                            <button onclick="logoutSession()" class="w-full mt-4 py-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-bold rounded-xl transition text-[11px] uppercase tracking-wider"><i class="fa-solid fa-power-off mr-1.5"></i>Terminate Session</button>
-                        </div>
+                    <div class="w-full mt-8 border-t border-white/5 pt-4 space-y-2 text-left">
+                        <div class="flex justify-between text-xs text-slate-400"><span>Active Runtime:</span><span class="text-white font-mono"><span id="db-time-spent">0</span> Min</span></div>
+                        <div class="flex justify-between text-xs text-slate-400"><span>Sync Stream:</span><span class="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">LIVE</span></div>
                     </div>
                 </div>
 
-                <!-- RIGHT SIDE PANEL: Realtime Islamic 360 Dashboard Engine -->
-                <div class="w-full md:w-2/3 p-6 md:p-8 overflow-y-auto bg-white/75 flex flex-col justify-between">
-                    <div class="flex justify-between items-center mb-6 border-b border-slate-200/60 pb-4">
+                <!-- Right Live Metrics Stream -->
+                <div class="w-full md:w-2/3 p-6 md:p-8 overflow-y-auto bg-slate-900/20">
+                    <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
                         <div>
-                            <h3 class="serif text-xl font-black text-slate-900">Spiritual <span class="text-emerald-500">Analytics</span></h3>
-                            <p class="text-slate-400 font-bold text-[9px] uppercase tracking-wider">Islamic 360 Core Sync Dashboard Data</p>
+                            <h3 class="display-title text-xl text-white">Live Spiritual <span class="text-emerald-400">Workspace</span></h3>
+                            <p class="text-slate-400 font-medium text-[10px] uppercase tracking-widest">Realtime Islamic Activity Log</p>
                         </div>
-                        <button onclick="toggleProfileModal(false)" class="hidden md:flex w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+                        <button onclick="toggleProfileModal(false)" class="hidden md:flex w-8 h-8 bg-white/5 hover:bg-white/10 text-white rounded-full items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
-                        <!-- Quran Log -->
-                        <div class="bg-white p-4 rounded-2xl border border-slate-200/60 flex flex-col justify-between shadow-sm">
-                            <div class="flex justify-between items-start">
-                                <div class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-sm"><i class="fa-solid fa-book-quran"></i></div>
-                                <span class="bg-emerald-50 text-emerald-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase">Quran Log</span>
-                            </div>
-                            <div class="mt-2">
-                                <p class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Total Ayahs Logged</p>
-                                <h3 id="dash-quran-ayahs" class="text-xl font-black text-slate-800">0 <span class="text-xs text-slate-400 font-medium">Ayahs</span></h3>
-                            </div>
-                            <p id="dash-quran-surah" class="text-[10px] text-slate-500 font-medium truncate mt-2 border-t pt-2">Last Read surah: None Logged</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-slate-950/40 p-5 rounded-xl border border-white/5">
+                            <div class="flex justify-between"><i class="fa-solid fa-book-quran text-emerald-400 text-lg"></i><span class="text-[9px] text-slate-500 uppercase tracking-widest">Quran Log</span></div>
+                            <h3 id="db-quran-ayahs" class="text-xl font-bold text-white mt-4">0 <span class="text-xs text-slate-400 font-medium">Ayahs</span></h3>
+                            <p id="db-last-surah" class="text-[11px] text-slate-400 mt-2 truncate font-medium">Last Read: Loading...</p>
                         </div>
-
-                        <!-- Prayer Tracker -->
-                        <div class="bg-white p-4 rounded-2xl border border-slate-200/60 flex flex-col justify-between shadow-sm">
-                            <div class="flex justify-between items-start">
-                                <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-sm"><i class="fa-solid fa-mosque"></i></div>
-                                <h3 id="dash-prayer-count" class="text-base font-black text-slate-800">0 / 5 Done</h3>
+                        <div class="bg-slate-950/40 p-5 rounded-xl border border-white/5">
+                            <div class="flex justify-between"><i class="fa-solid fa-mosque text-blue-400 text-lg"></i><h3 id="db-prayers-count" class="text-sm font-bold text-white">0 / 5 Completed</h3></div>
+                            <div id="db-prayer-dots" class="flex gap-2 mt-5">
+                                <span data-prayer="Fajr" class="w-2 h-2 rounded-full bg-white/10 transition-colors"></span>
+                                <span data-prayer="Dhuhr" class="w-2 h-2 rounded-full bg-white/10 transition-colors"></span>
+                                <span data-prayer="Asr" class="w-2 h-2 rounded-full bg-white/10 transition-colors"></span>
+                                <span data-prayer="Maghrib" class="w-2 h-2 rounded-full bg-white/10 transition-colors"></span>
+                                <span data-prayer="Isha" class="w-2 h-2 rounded-full bg-white/10 transition-colors"></span>
                             </div>
-                            <div class="mt-2">
-                                <p class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Daily Routine Check</p>
-                                <div id="dash-prayer-dots" class="flex gap-2 mt-2">
-                                    <span data-p="Fajr" class="w-2 h-2 rounded-full bg-slate-200 transition-colors"></span>
-                                    <span data-p="Dhuhr" class="w-2 h-2 rounded-full bg-slate-200 transition-colors"></span>
-                                    <span data-p="Asr" class="w-2 h-2 rounded-full bg-slate-200 transition-colors"></span>
-                                    <span data-p="Maghrib" class="w-2 h-2 rounded-full bg-slate-200 transition-colors"></span>
-                                    <span data-p="Isha" class="w-2 h-2 rounded-full bg-slate-200 transition-colors"></span>
-                                </div>
-                            </div>
-                            <span class="text-[8px] text-blue-500 font-black uppercase tracking-wider mt-2 block"><i class="fa-solid fa-bell mr-1"></i>Realtime Alarms Active</span>
+                            <p class="text-[10px] text-blue-400 tracking-wider uppercase mt-3 font-semibold">Routine Hub Active</p>
                         </div>
-
-                        <!-- Hadith Analytics -->
-                        <div class="bg-white p-4 rounded-2xl border border-slate-200/60 flex flex-col justify-between shadow-sm">
-                            <div class="flex justify-between items-start">
-                                <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-sm"><i class="fa-solid fa-book"></i></div>
-                            </div>
-                            <div class="mt-2">
-                                <p class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Hadith Readings</p>
-                                <h3 id="dash-hadith-count" class="text-xl font-black text-slate-800">0 <span class="text-xs text-slate-400 font-medium">Read</span></h3>
-                            </div>
-                            <p id="dash-hadith-book" class="text-[10px] text-slate-500 font-medium truncate mt-2 border-t pt-2">Book Stream: None Logged</p>
+                        <div class="bg-slate-950/40 p-5 rounded-xl border border-white/5">
+                            <div class="flex justify-between"><i class="fa-solid fa-book text-amber-400 text-lg"></i><span class="text-[9px] text-slate-500 uppercase tracking-widest">Hadith Log</span></div>
+                            <h3 id="db-hadith-count" class="text-xl font-bold text-white mt-4">0 <span class="text-xs text-slate-400 font-medium">Read</span></h3>
+                            <p id="db-last-hadith" class="text-[11px] text-slate-400 mt-2 truncate font-medium">Book: Loading...</p>
                         </div>
-
-                        <!-- Tasbeeh Counter -->
-                        <div class="bg-white p-4 rounded-2xl border border-slate-200/60 flex flex-col justify-between shadow-sm">
-                            <div class="flex justify-between items-start">
-                                <div class="w-8 h-8 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-sm"><i class="fa-solid fa-circle-dot"></i></div>
-                                <span id="dash-tasbeeh-goals" class="bg-purple-50 text-purple-600 text-[8px] font-black px-2 py-0.5 rounded-full uppercase">0 Goals</span>
-                            </div>
-                            <div class="mt-2">
-                                <p class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Accumulated Dhikr Count</p>
-                                <h3 id="dash-tasbeeh-total" class="text-xl font-black text-slate-800">0</h3>
-                            </div>
-                            <p class="text-[9px] text-slate-400 font-semibold mt-2 border-t pt-2">Engine Synchronized</p>
+                        <div class="bg-slate-950/40 p-5 rounded-xl border border-white/5">
+                            <div class="flex justify-between"><i class="fa-solid fa-circle-dot text-purple-400 text-lg"></i><span id="db-tasbeeh-goals" class="text-[9px] bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded-md">0 Goals</span></div>
+                            <h3 id="db-tasbeeh-total" class="text-xl font-bold text-white mt-4">0</h3>
+                            <p class="text-[10px] text-slate-400 mt-2 font-medium">Total Dhikr Counter Snapshot</p>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
 
-        <!-- Sidebar Navigation Drawer for Mobile Layouts -->
-        <div id="sidebar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[110] hidden opacity-0 transition-opacity">
-            <div class="w-80 h-full bg-white ml-auto p-12 flex flex-col shadow-2xl">
-                <button onclick="toggleSidebar(false)" class="self-end text-3xl mb-12 text-slate-300"><i class="fa-solid fa-xmark"></i></button>
-                <nav class="flex flex-col gap-8 text-2xl font-black italic text-slate-800">
-                    <a href="quran.html">Quran</a>
-                    <a href="hadees.html">Hadith</a>
-                    <a href="https://education-point-360.github.io/NUR/">AI Assistant</a>
-                    <a href="namaz.html">Prayer Hub</a>
-                    <a href="tabeeh.html">Tasbeeh</a>
-                    <a href="adkhar.html">Adkhar</a>
+        <!-- Sidebar Navigation Drawer -->
+        <div id="sidebar" class="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[110] hidden opacity-0 transition-opacity">
+            <div class="w-72 h-full bg-[#090d16] ml-auto p-8 flex flex-col border-l border-white/5 shadow-2xl">
+                <button onclick="toggleSidebar(false)" class="self-end text-2xl mb-8 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+                <nav class="flex flex-col gap-6 text-lg font-bold tracking-wider text-slate-200">
+                    <a href="quran.html" class="hover:text-emerald-400 transition">Quran</a>
+                    <a href="hadees.html" class="hover:text-emerald-400 transition">Hadith</a>
+                    <a href="https://education-point-360.github.io/NUR/" class="hover:text-emerald-400 transition">AI Assistant</a>
+                    <a href="namaz.html" class="hover:text-emerald-400 transition">Prayer Hub</a>
+                    <a href="tabeeh.html" class="hover:text-emerald-400 transition">Tasbeeh</a>
+                    <a href="adkhar.html" class="hover:text-emerald-400 transition">Adkhar</a>
                 </nav>
             </div>
         </div>
 
-        <!-- HERO SPLASH SECTION -->
-        <header class="min-h-screen flex items-center justify-center text-center px-6 relative overflow-hidden bg-white pt-24">
-            <div class="shape w-96 h-96 bg-emerald-400 top-20 left-10"></div>
-            <div class="shape w-96 h-96 bg-blue-400 bottom-20 right-10" style="animation-delay: -5s"></div>
+        <!-- Hero Stage Space Section -->
+        <header class="min-h-screen flex items-center justify-center text-center px-6 relative overflow-hidden pt-24">
+            <div class="absolute inset-0 z-0 bg-cover bg-center mix-blend-overlay opacity-5" style="background-image: url('https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1920&q=80');"></div>
             
-            <div class="z-10 w-full max-w-5xl mx-auto">
-                <h2 class="animate__animated animate__fadeInDown text-emerald-500 font-bold uppercase tracking-[0.6em] text-[10px] mb-4">Innovating Faith & Technology</h2>
-                <h1 class="animate__animated animate__zoomIn serif text-6xl md:text-[8rem] font-black italic text-slate-900 leading-[0.9] mb-6">
-                    NUR <br> <span class="text-emerald-500">Portal.</span>
+            <div class="z-10 max-w-4xl mx-auto">
+                <div class="inline-flex bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-extrabold uppercase tracking-[0.3em] px-4 py-1.5 rounded-full mb-6">
+                    <i class="fa-solid fa-circle-check mr-2 animate-pulse"></i> <span id="live-greeting">Welcome to Divine Light</span>
+                </div>
+                
+                <h1 class="display-title text-5xl md:text-8xl font-black text-white tracking-widest leading-none mb-8">
+                    NOOR <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">PORTAL</span>
                 </h1>
-                <p class="animate__animated animate__fadeInUp animate__delay-1s text-slate-400 max-w-xl mx-auto text-base md:text-lg font-medium mb-6">
-                    "Knowledge, Faith, and Technology in Harmony." An advanced realtime digital environment crafted to track daily spiritual actions, prayers, and study pipelines seamlessly[span_0](start_span)[span_0](end_span).
+                
+                <p class="text-slate-400 max-w-xl mx-auto text-base md:text-lg font-medium mb-8">
+                    "Knowledge, Faith, and Technology in Perfect Harmony." Step into a modern, real-time premium Islamic workspace tailored for your spiritual tracking.
                 </p>
 
-                <!-- Realtime Dynamic Prayer State Board (Islamic 360 Feature) -->
-                <div class="animate__animated animate__fadeInUp animate__delay-1s max-w-md mx-auto bg-slate-50 border border-slate-200/60 p-4 rounded-2xl mb-6 flex justify-around items-center shadow-sm">
-                    <div class="text-left">
-                        <span class="text-[9px] text-slate-400 font-black uppercase tracking-wider block">Current Prayer</span>
-                        <span id="live-current-prayer" class="text-base font-black text-slate-800">LOADING...</span>
-                    </div>
-                    <div class="w-px h-8 bg-slate-200"></div>
-                    <div class="text-right">
-                        <span class="text-[9px] text-slate-400 font-black uppercase tracking-wider block">Next Prayer In</span>
-                        <span id="live-next-prayer-countdown" class="text-base font-black text-emerald-600 font-mono">00:00:00</span>
-                    </div>
-                </div>
-
-                <!-- Last Read Quick Resume Anchor Component Link -->
-                <div class="animate__animated animate__fadeInUp animate__delay-1s mb-8">
-                    <a id="quick-resume-link" href="quran.html" class="inline-flex items-center gap-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-5 py-2.5 rounded-xl text-xs font-bold tracking-wide transition shadow-sm">
-                        <i class="fa-solid fa-bookmark text-emerald-500"></i>
-                        <span id="quick-resume-display-str">Last Read: No surah logged yet</span>
+                <div class="mb-12">
+                    <a id="quick-resume-btn" href="quran.html" class="inline-flex items-center gap-3 bg-white/[0.03] hover:bg-white/[0.06] text-emerald-400 border border-white/5 px-6 py-3 rounded-xl text-xs font-bold tracking-wider transition shadow-inner">
+                        <i class="fa-solid fa-bookmark text-emerald-400 animate-pulse"></i>
+                        <span id="quick-resume-text">Resume Reading: Loading Last Track...</span>
                     </a>
                 </div>
 
-                <div class="animate__animated animate__fadeInUp animate__delay-1s flex flex-wrap justify-center gap-4 items-center">
-                    <a href="#prayer-timings-grid" class="px-10 py-4 bg-slate-900 text-white rounded-xl font-black shadow-xl hover:scale-105 transition text-xs uppercase tracking-wider">Prayer Timings</a>
-                    <a href="https://education-point-360.github.io/NUR/" class="px-10 py-4 bg-white border border-slate-200 rounded-xl font-black hover:border-emerald-500 transition text-xs uppercase tracking-wider">Nur AI Engine</a>
+                <div class="flex flex-wrap justify-center gap-4 items-center">
+                    <a href="#prayer-hub" class="px-10 py-4.5 bg-emerald-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/10 hover:bg-emerald-400 transition">Prayer Timeline</a>
+                    <a href="https://education-point-360.github.io/NUR/" class="px-10 py-4.5 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition">Noor AI Assistant</a>
                 </div>
             </div>
         </header>
 
-        <!-- LIVE DAILY STREAM DATA WORKSPACE (Ayat of Day & Hadith of Day with Urdu Fonts) -->
-        <section class="py-20 bg-slate-50 border-y border-slate-200/40 relative">
-            <div class="max-w-5xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Ayat of the Day Component Box -->
-                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-xl flex flex-col justify-between min-h-[320px] reveal">
+        <!-- Realtime Context Strip -->
+        <section class="py-12 border-y border-white/5 bg-slate-950/20 relative z-10">
+            <div class="max-w-5xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div>
+                    <h6 class="text-slate-500 font-bold uppercase text-[9px] tracking-widest mb-1">Live Universal Time</h6>
+                    <p id="clock" class="text-2xl font-black text-white font-mono tracking-wider">00:00:00</p>
+                </div>
+                <div class="md:border-x border-white/5 px-4">
+                    <h6 class="text-slate-500 font-bold uppercase text-[9px] tracking-widest mb-1">Geographic Context Node</h6>
+                    <p id="location" class="text-sm font-bold text-emerald-400"><i class="fa-solid fa-location-crosshairs mr-2 animate-spin"></i>Syncing Coordinates...</p>
+                </div>
+                <div>
+                    <h6 class="text-slate-500 font-bold uppercase text-[9px] tracking-widest mb-1">Calendar Matrices</h6>
+                    <p id="dashboard-hijri" class="text-sm font-bold text-white">Syncing Hijri Node...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Premium Realtime Prayer Hub Section -->
+        <section id="prayer-hub" class="py-24 px-6 max-w-6xl mx-auto relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="display-title text-3xl font-bold text-white tracking-widest">REALTIME <span class="text-emerald-400">PRAYERS</span></h2>
+                <p class="text-slate-500 text-xs uppercase tracking-widest mt-1">Automatic Prayer Detection & Precise Countdowns</p>
+            </div>
+
+            <!-- Live Active Focus Card -->
+            <div class="premium-glass rounded-3xl p-8 border border-white/10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center mb-8 shadow-xl">
+                <div class="space-y-2 text-center lg:text-left">
+                    <span class="text-[10px] uppercase text-emerald-400 font-extrabold tracking-widest block">Now Active Phase</span>
+                    <h3 id="current-prayer-display" class="display-title text-4xl font-black text-white">LOADING</h3>
+                </div>
+                <div class="text-center py-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                    <span class="text-[10px] uppercase text-slate-400 font-bold tracking-widest block mb-1">Next Prayer Phase Countdown</span>
+                    <div id="countdown-display" class="text-3xl font-black font-mono text-emerald-400 tracking-wider">00:00:00</div>
+                    <p id="next-prayer-name-display" class="text-xs text-slate-500 mt-1 font-semibold uppercase tracking-widest">UNTIL NEXT PHASE</p>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs text-slate-400 font-bold uppercase tracking-wider"><span>Daily Timeline Progress</span> <span id="prayer-progress-percent">0%</span></div>
+                    <div class="w-full bg-slate-950/60 rounded-full h-2 overflow-hidden border border-white/5">
+                        <div id="prayer-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Times Grid Row -->
+            <div id="timetable-row" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <!-- Cards will be actively targeted by JS Injector -->
+                <div data-p-card="Fajr" class="premium-card p-5 rounded-2xl text-center">
+                    <h5 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Fajr</h5>
+                    <p class="text-xl font-bold font-mono text-white mt-3" id="time-Fajr">--:--</p>
+                </div>
+                <div data-p-card="Dhuhr" class="premium-card p-5 rounded-2xl text-center">
+                    <h5 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Dhuhr</h5>
+                    <p class="text-xl font-bold font-mono text-white mt-3" id="time-Dhuhr">--:--</p>
+                </div>
+                <div data-p-card="Asr" class="premium-card p-5 rounded-2xl text-center">
+                    <h5 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Asr</h5>
+                    <p class="text-xl font-bold font-mono text-white mt-3" id="time-Asr">--:--</p>
+                </div>
+                <div data-p-card="Maghrib" class="premium-card p-5 rounded-2xl text-center">
+                    <h5 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Maghrib</h5>
+                    <p class="text-xl font-bold font-mono text-white mt-3" id="time-Maghrib">--:--</p>
+                </div>
+                <div data-p-card="Isha" class="premium-card p-5 rounded-2xl text-center col-span-2 md:col-span-1">
+                    <h5 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Isha</h5>
+                    <p class="text-xl font-bold font-mono text-white mt-3" id="time-Isha">--:--</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Content Stream Framework (Ayah & Hadith) -->
+        <section class="py-24 px-6 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+            <!-- Ayah Stream Card -->
+            <div class="premium-glass rounded-3xl p-8 border border-white/10 flex flex-col justify-between shadow-xl">
+                <div>
+                    <div class="flex justify-between items-center mb-6"><span class="text-[10px] font-extrabold uppercase bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-3 py-1 rounded-md tracking-widest">Ayah of the Day</span> <i class="fa-solid fa-quote-left text-slate-600 text-xl"></i></div>
+                    <p id="live-ayah-arabic" class="serif-islamic text-3xl text-right text-white leading-loose mb-6">...</p>
+                    <p id="live-ayah-english" class="text-slate-300 text-sm leading-relaxed mb-4">Loading Ayah English translation stream...</p>
+                    <p id="live-ayah-urdu" class="serif-islamic text-emerald-300 text-lg text-right leading-loose mb-6">اردو ترجمہ لوڈ ہو رہا ہے...</p>
+                </div>
+                <div class="flex justify-between items-center border-t border-white/5 pt-4">
+                    <span id="live-ayah-ref" class="text-xs font-bold text-slate-500 uppercase tracking-widest">SURAH -- : --</span>
+                    <div class="flex gap-2">
+                        <button onclick="copyContent('live-ayah-english')" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500 hover:text-slate-950 transition text-slate-400 text-xs"><i class="fa-solid fa-copy"></i></button>
+                        <button onclick="shareText('Ayah of the Day', 'live-ayah-english')" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500 hover:text-slate-950 transition text-slate-400 text-xs"><i class="fa-solid fa-share-nodes"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hadith Stream Card -->
+            <div class="premium-glass rounded-3xl p-8 border border-white/10 flex flex-col justify-between shadow-xl">
+                <div>
+                    <div class="flex justify-between items-center mb-6"><span class="text-[10px] font-extrabold uppercase bg-teal-500/10 text-teal-300 border border-teal-500/20 px-3 py-1 rounded-md tracking-widest">Hadith of the Day</span> <i class="fa-solid fa-feather text-slate-600 text-xl"></i></div>
+                    <p id="live-hadith-arabic" class="serif-islamic text-2xl text-right text-white leading-loose mb-6">...</p>
+                    <p id="live-hadith-english" class="text-slate-300 text-sm leading-relaxed mb-4">Loading Hadith English text transmission...</p>
+                    <p id="live-hadith-urdu" class="serif-islamic text-teal-300 text-lg text-right leading-loose mb-6">حدیث مبارکہ کا اردو ترجمہ لوڈ ہو رہا ہے...</p>
+                </div>
+                <div class="flex justify-between items-center border-t border-white/5 pt-4">
+                    <span id="live-hadith-ref" class="text-xs font-bold text-slate-500 uppercase tracking-widest">HADITH SNAPSHOT</span>
+                    <div class="flex gap-2">
+                        <button onclick="copyContent('live-hadith-english')" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500 hover:text-slate-950 transition text-slate-400 text-xs"><i class="fa-solid fa-copy"></i></button>
+                        <button onclick="shareText('Hadith of the Day', 'live-hadith-english')" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500 hover:text-slate-950 transition text-slate-400 text-xs"><i class="fa-solid fa-share-nodes"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modern Premium Feature Bento Grid -->
+        <section class="py-24 px-6 max-w-6xl mx-auto relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="display-title text-3xl font-bold text-white tracking-widest">EXPLORE <span class="text-emerald-400">CORE FEATURES</span></h2>
+                <p class="text-slate-500 text-xs uppercase tracking-widest mt-1">Premium Ecosystem Integrated Components</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <a href="quran.html" class="premium-card p-6 rounded-2xl flex flex-col justify-between min-h-[180px]">
+                    <div class="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-book-quran"></i></div>
                     <div>
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="bg-emerald-50 text-emerald-600 font-black text-[10px] tracking-widest uppercase px-3 py-1 rounded-lg">Ayat Of The Day</span>
-                            <span id="live-card-ayat-ref" class="text-xs text-slate-400 font-bold">Surah Al-Baqarah</span>
-                        </div>
-                        <p id="live-card-ayat-ar" class="text-right text-xl font-bold text-slate-800 leading-loose tracking-wide font-serif mb-4" dir="rtl">...LOADING ARABIC STREAM...</p>
+                        <h4 class="text-lg font-bold text-white mb-1">Holy Quran</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Read, stream translations, and resume your progress nodes smoothly.</p>
                     </div>
-                    <p id="live-card-ayat-ur" class="text-right text-base text-emerald-700 font-medium urdu" dir="rtl">...اردو ترجمہ لوڈ ہو رہا ہے...</p>
-                </div>
-
-                <!-- Hadith of the Day Component Box -->
-                <div class="bg-white p-8 rounded-3xl border border-slate-200/60 shadow-xl flex flex-col justify-between min-h-[320px] reveal">
+                </a>
+                <a href="hadees.html" class="premium-card p-6 rounded-2xl flex flex-col justify-between min-h-[180px]">
+                    <div class="w-10 h-10 bg-teal-500/10 text-teal-400 rounded-xl flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-book text-teal-400"></i></div>
                     <div>
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="bg-amber-50 text-amber-600 font-black text-[10px] tracking-widest uppercase px-3 py-1 rounded-lg">Hadith Of The Day</span>
-                            <span id="live-card-hadith-ref" class="text-xs text-slate-400 font-bold">Sahih Al-Bukhari</span>
-                        </div>
-                        <p id="live-card-hadith-ar" class="text-right text-lg font-semibold text-slate-800 leading-loose tracking-wide font-serif mb-4" dir="rtl">...LOADING ARABIC STREAM...</p>
+                        <h4 class="text-lg font-bold text-white mb-1">Authentic Hadith</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Explore comprehensive books of Hadith with verified references.</p>
                     </div>
-                    <p id="live-card-hadith-ur" class="text-right text-base text-amber-700 font-medium urdu" dir="rtl">...اردو ترجمہ لوڈ ہو رہا ہے...</p>
+                </a>
+                <a href="adkhar.html" class="premium-card p-6 rounded-2xl flex flex-col justify-between min-h-[180px]">
+                    <div class="w-10 h-10 bg-amber-500/10 text-amber-400 rounded-xl flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-hands-praying"></i></div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white mb-1">Masnoon Duas</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Daily authentic supplications for every sphere of life tracking.</p>
+                    </div>
+                </a>
+                <a href="tabeeh.html" class="premium-card p-6 rounded-2xl flex flex-col justify-between min-h-[180px]">
+                    <div class="w-10 h-10 bg-purple-500/10 text-purple-400 rounded-xl flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-circle-dot"></i></div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white mb-1">Digital Tasbeeh</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Real-time counts logs with active goal-setting engines.</p>
+                    </div>
+                </a>
+                <div class="premium-card p-6 rounded-2xl flex flex-col justify-between min-h-[180px] cursor-pointer" onclick="alert('Qibla Compass Engine aligns via Geolocation API Node.')">
+                    <div class="w-10 h-10 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-compass"></i></div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white mb-1">Qibla Direction</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Accurate orientation pointer mapped via device sensors streams.</p>
+                    </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- REALTIME CONTEXT & CLOCK SYSTEM FOOTPRINT BAR -->
-        <section class="py-12 bg-slate-900 text-white relative">
-            <div class="max-w-4xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
-                <div class="reveal">
-                    <h6 class="text-emerald-400 font-black uppercase text-[9px] tracking-widest mb-2">Universal Time Engine</h6>
-                    <p id="clock" class="text-3xl font-black tracking-widest font-mono text-white">00:00:00</p>
-                </div>
-                <div class="reveal md:border-l border-white/10 px-6">
-                    <h6 class="text-emerald-400 font-black uppercase text-[9px] tracking-widest mb-2">Geographical Location Context</h6>
-                    <p id="location" class="text-lg font-bold italic text-white"><i class="fa-solid fa-location-arrow text-xs mr-2 animate-pulse"></i>Syncing Coordinates...</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- REALTIME PRAYER TIMINGS GRID WORKSPACE (Islamic 360 Feature Layout) -->
-        <section id="prayer-timings-grid" class="py-24 bg-white relative">
-            <div class="max-w-5xl mx-auto px-6">
-                <div class="text-center max-w-xl mx-auto mb-16">
-                    <span class="text-emerald-500 font-black tracking-widest uppercase text-[10px] bg-emerald-50 px-3 py-1 rounded-full">Aladhan Live Synchronizer</span>
-                    <h2 class="serif text-4xl font-black text-slate-900 mt-3">Realtime Prayer <span class="text-emerald-500">Timetable</span></h2>
-                    <p class="text-slate-400 text-sm font-medium mt-2">Dynamic structural calendar matching current tracking system geo-coordinates instantly.</p>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div id="pt-card-Fajr" class="bg-slate-50 border border-slate-200/60 p-5 rounded-2xl text-center shadow-sm transition">
-                        <span class="text-[10px] text-slate-400 font-black uppercase tracking-wider block mb-1">Fajr</span>
-                        <h4 id="pt-time-Fajr" class="text-xl font-black text-slate-800 font-mono">00:00</h4>
-                    </div>
-                    <div id="pt-card-Dhuhr" class="bg-slate-50 border border-slate-200/60 p-5 rounded-2xl text-center shadow-sm transition">
-                        <span class="text-[10px] text-slate-400 font-black uppercase tracking-wider block mb-1">Dhuhr</span>
-                        <h4 id="pt-time-Dhuhr" class="text-xl font-black text-slate-800 font-mono">00:00</h4>
-                    </div>
-                    <div id="pt-card-Asr" class="bg-slate-50 border border-slate-200/60 p-5 rounded-2xl text-center shadow-sm transition">
-                        <span class="text-[10px] text-slate-400 font-black uppercase tracking-wider block mb-1">Asr</span>
-                        <h4 id="pt-time-Asr" class="text-xl font-black text-slate-800 font-mono">00:00</h4>
-                    </div>
-                    <div id="pt-card-Maghrib" class="bg-slate-50 border border-slate-200/60 p-5 rounded-2xl text-center shadow-sm transition">
-                        <span class="text-[10px] text-slate-400 font-black uppercase tracking-wider block mb-1">Maghrib</span>
-                        <h4 id="pt-time-Maghrib" class="text-xl font-black text-slate-800 font-mono">00:00</h4>
-                    </div>
-                    <div id="pt-card-Isha" class="bg-slate-50 border border-slate-200/60 p-5 rounded-2xl text-center shadow-sm transition">
-                        <span class="text-[10px] text-slate-400 font-black uppercase tracking-wider block mb-1">Isha</span>
-                        <h4 id="pt-time-Isha" class="text-xl font-black text-slate-800 font-mono">00:00</h4>
+                <div class="premium-card p-6 rounded-2xl flex flex-col justify-between min-h-[180px] cursor-pointer" onclick="alert('99 Names of Allah audio playlist syncs via core buffer.')">
+                    <div class="w-10 h-10 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-star-and-crescent"></i></div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white mb-1">99 Names of Allah</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Beautifully structured recitation and audio meanings.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- MASNOON DUAEN WORKSPACE SECTION (Islamic 360 Feature) -->
-        <section class="py-24 bg-slate-50 border-t border-slate-200/50 relative">
-            <div class="max-w-5xl mx-auto px-6">
-                <div class="text-center max-w-xl mx-auto mb-16">
-                    <span class="text-emerald-500 font-black tracking-widest uppercase text-[10px]">Daily Spiritual Shields</span>
-                    <h2 class="serif text-4xl font-black text-slate-900 mt-2">Masnoon <span class="text-emerald-500">Duaen</span></h2>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col justify-between">
-                        <div>
-                            <span class="text-[9px] font-black uppercase bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-md mb-4 inline-block">Before Sleeping</span>
-                            <p class="text-right text-lg font-bold text-slate-800 leading-loose tracking-wide font-serif mb-3" dir="rtl">بِاسْمِکَ اَللّٰھُمَّ اَمُوْتُ وَاَحْیٰی۔</p>
-                        </div>
-                        <p class="text-right text-xs text-emerald-700 font-medium urdu border-t pt-2" dir="rtl">اے اللہ! میں تیرے ہی نام کے ساتھ مرتا ہوں اور جیتا ہوں۔</p>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col justify-between">
-                        <div>
-                            <span class="text-[9px] font-black uppercase bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-md mb-4 inline-block">Upon Waking Up</span>
-                            <p class="text-right text-lg font-bold text-slate-800 leading-loose tracking-wide font-serif mb-3" dir="rtl">اَلْحَمْدُ لِلهِ الَّذِیْ اَحْیَانَا بَعْدَ مَا اَمَاتَنَا وَاِلَیْهِ النُّشُوْرُ۔</p>
-                        </div>
-                        <p class="text-right text-xs text-emerald-700 font-medium urdu border-t pt-2" dir="rtl">تمام تعریفیں اللہ کے لیے ہیں جس نے ہمیں مارنے کے بعد زندہ کیا اور اسی کی طرف لوٹ کر جانا ہے۔</p>
-                    </div>
-                </div>
+        <!-- Float Expand FAB Component Container -->
+        <div class="fixed right-6 bottom-6 z-[9999] flex flex-col items-end gap-3" id="menu-container">
+            <div id="menu-items" class="flex flex-col gap-3 pointer-events-none opacity-0 translate-y-12 transition-all duration-500">
+                <a href="https://nurislumic.netlify.app" target="_blank" class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 border border-white/10 text-emerald-400 shadow-2xl hover:bg-slate-800 transition"><i class="fa-solid fa-kaaba"></i></a>
             </div>
-        </section>
+            <button onclick="toggleMenu()" id="menu-trigger" class="relative flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-500 text-slate-950 shadow-2xl active:scale-95 transition-all">
+                <i id="menu-icon" class="fa-solid fa-plus text-xl transition-transform duration-500"></i>
+            </button>
+        </div>
 
-        <!-- NOBLE NUR DOCK GRAPHIC DESCRIPTION BIOGRAPHY SECTION -->
-        <section id="biography" class="relative py-32 bg-white overflow-hidden">
-            <div class="absolute inset-0 opacity-[0.02] pointer-events-none">
-                <i class="fa-solid fa-kaaba text-[30rem] absolute -top-10 -left-10 text-emerald-900"></i>
-            </div>
-            
-            <div class="max-w-5xl mx-auto px-6 relative">
-                <div class="reveal-wipe flex flex-col lg:flex-row items-center gap-12 relative">
-                    <div class="w-full lg:w-1/2 flex justify-center">
-                        <div class="relative group">
-                            <div class="absolute -inset-4 bg-emerald-500 rounded-[4rem] opacity-10 blur-xl"></div>
-                            <div class="relative w-60 h-60 lg:w-80 lg:h-80 bg-slate-900 p-6 rounded-[4rem] flex items-center justify-center border border-slate-800 shadow-2xl">
-                                <i class="fa-solid fa-moon text-[8rem] text-transparent bg-clip-text bg-gradient-to-t from-emerald-400 to-teal-400 animate-pulse"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="w-full lg:w-1/2 space-y-6 text-center lg:text-left">
-                        <div class="inline-block px-4 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[9px] font-black uppercase tracking-widest">Core Narrative</div>
-                        <h3 class="serif text-4xl lg:text-6xl font-black italic text-slate-900 leading-none">The NUR Project</h3>
-                        <p class="text-emerald-500 font-black italic text-base">"Knowledge, Faith, and Technology in Harmony"</p>
-                        <p class="text-slate-600 text-sm leading-relaxed">
-                            NUR stands as a highly robust ecosystem developed to bridge clean user interfaces with Islamic information hubs. Utilizing responsive layouts, real-time sync nodes via Core engine pipelines, and cross-platform notification configurations, the environment fosters productivity and structural daily evaluation loops flawlessly[span_1](start_span)[span_1](end_span).
-                        </p>
-                    </div>
+        <!-- System Architecture Premium Footer Layer -->
+        <footer class="bg-slate-950/60 border-t border-white/5 py-12 px-6 relative z-10">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.4em]">&copy; 2026 NOOR HUB PORTAL SYSTEM | ALL RIGHT PRESERVED[span_7](start_span)[span_7](end_span)</p>
+                <div class="flex gap-6 text-xs text-slate-400 font-semibold tracking-wider">
+                    <a href="quran.html" class="hover:text-white transition">Quran Nodes</a>
+                    <a href="hadees.html" class="hover:text-white transition">Hadith Stream</a>
                 </div>
-            </div>
-
-            <!-- Expanding Dashboard Action Fab Menu Link Node Group -->
-            <div class="fixed right-6 bottom-6 z-[9999] flex flex-col items-end gap-3" id="menu-container">
-                <div id="menu-items" class="flex flex-col gap-3 pointer-events-none opacity-0 translate-y-12 transition-all duration-500">
-                    <div class="relative group">
-                        <a href="https://edupointai.netlify.app" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 overflow-hidden shadow-2xl">
-                            <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap"><span class="text-xs font-bold text-white">EduPoint AI</span></div>
-                            <div class="flex h-12 w-12 items-center justify-center bg-zinc-900/50 text-blue-500"><i class="fa-solid fa-microchip text-sm"></i></div>
-                        </a>
-                    </div>
-                    <div class="relative group">
-                        <a href="https://nurislumic.netlify.app" target="_blank" class="relative flex items-center justify-end bg-black/80 backdrop-blur-md border border-white/10 w-12 h-12 hover:w-44 rounded-xl transition-all duration-500 overflow-hidden shadow-2xl">
-                            <div class="absolute left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap"><span class="text-xs font-bold text-white">Nur Islam</span></div>
-                            <div class="flex h-12 w-12 items-center justify-center bg-zinc-900/50 text-emerald-500"><i class="fa-solid fa-kaaba text-sm"></i></div>
-                        </a>
-                    </div>
-                </div>
-                <button onclick="toggleMenu()" id="menu-trigger" class="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-black shadow-2xl active:scale-90 transition-all">
-                    <i id="menu-icon" class="fa-solid fa-plus text-xl transition-transform duration-500"></i>
-                </button>
-            </div>
-        </section>
-
-        <!-- FOOTER WORKSPACE END BLOCK -->
-        <footer class="bg-slate-900 pt-16 pb-12 px-8 overflow-hidden relative border-t border-white/5">
-            <div class="max-w-5xl mx-auto text-center">
-                <p class="text-slate-500 text-[9px] font-black uppercase tracking-[0.4em]">&copy; 2026 NUR PORTAL INTEGRATED ENVIRONMENT | ALL RIGHTS RESERVED[span_2](start_span)[span_2](end_span)</p>
             </div>
         </footer>
     </div>
 
-    <!-- CORE INTERFACE LOGIC SCRIPT WORKSPACE -->
     <script>
-        let currentAuthMode = 'login';
-        let globalTimings = null;
+        let gatewayMode = 'login';
+        let internalPrayerTimings = {};
 
+        // Pipeline initialization sequence listeners
         window.addEventListener('load', () => {
             window.addEventListener('nurStateSync', (e) => {
                 renderStateToDashboard(e.detail);
             });
             
-            // Re-sync UI state components instantly from cache pipelines if user details exist
-            const snapshot = window.NurCore.getSnapshot();
-            updateAuthVisualState(snapshot?.user?.authenticated || false);
+            const currentSnapshot = window.NurCore.getSnapshot();
+            const localAuthToken = localStorage.getItem('nur_authenticated_user');
             
-            initRealtimeNotificationSystem();
-            fetchLiveLocationData();
-            fetchDailyAyatAndHadithStreams();
+            if (localAuthToken || (currentSnapshot && currentSnapshot.user && currentSnapshot.user.authenticated)) {
+                unlockAppInterface(localAuthToken || currentSnapshot.user.name || currentSnapshot.user.id);
+            }
+            
+            triggerDynamicQuoteGreeter();
+            fetchStaticAyahHadithFeeds();
         });
-
-        // Toggle Profile Modal Opening Action Trigger
-        function openProfileGateway() {
-            toggleProfileModal(true);
-            const snapshot = window.NurCore.getSnapshot();
-            updateAuthVisualState(snapshot?.user?.authenticated || false);
-        }
 
         function toggleProfileModal(show) {
             const modal = document.getElementById('profile-modal');
-            modal.className = show ? "fixed inset-0 bg-slate-900/60 backdrop-blur-lg z-[9999] flex items-center justify-center p-4 transition-all" : "fixed inset-0 bg-slate-900/60 backdrop-blur-lg z-[9999] hidden items-center justify-center p-4 transition-all";
+            modal.className = show ? "fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[999] flex items-center justify-center p-4" : "hidden";
         }
 
-        // Switches layout view states between sign in and sign up inside side panel
-        function toggleAuthMode() {
-            const title = document.getElementById('auth-title');
-            const submitBtn = document.getElementById('auth-submit-btn');
-            const toggleBtn = document.getElementById('auth-toggle-btn');
-            const nameWrapper = document.getElementById('auth-name-wrapper');
+        function switchGatewayMode() {
+            const mainBtn = document.getElementById('gate-main-btn');
+            const switchBtn = document.getElementById('gate-switch-btn');
+            const switchText = document.getElementById('gate-switch-text');
+            const nameField = document.getElementById('name-field-container');
 
-            if (currentAuthMode === 'login') {
-                currentAuthMode = 'signup';
-                title.innerText = "Create Account";
-                submitBtn.innerText = "Register Fresh Node";
-                toggleBtn.innerText = "Already have a node? Sign In";
-                nameWrapper.classList.remove('hidden');
+            if (gatewayMode === 'login') {
+                gatewayMode = 'signup';
+                mainBtn.innerText = 'Register Node';
+                switchBtn.innerText = 'Sign In';
+                switchText.innerText = 'Already verified?';
+                nameField.classList.remove('hidden');
             } else {
-                currentAuthMode = 'login';
-                title.innerText = "Cloud Sync Entry";
-                submitBtn.innerText = "Access Workspace";
-                toggleBtn.innerText = "Create New Node Account";
-                nameWrapper.classList.add('hidden');
+                gatewayMode = 'login';
+                mainBtn.innerText = 'Access Live Platform';
+                switchBtn.innerText = 'Create Node';
+                switchText.innerText = "Don't have an account?";
+                nameField.classList.add('hidden');
             }
         }
 
-        // Visual Layout Engine State Splitter
-        function updateAuthVisualState(isAuthenticated) {
-            const authContainer = document.getElementById('modal-auth-container');
-            const infoContainer = document.getElementById('modal-info-container');
-            const navBadge = document.getElementById('nav-user-badge');
+        async function executeGatewayAuth() {
+            const email = document.getElementById('gate-email').value;
+            const password = document.getElementById('gate-pass').value;
+            const fullName = document.getElementById('gate-name').value || "Faith Seeker";
 
-            if (isAuthenticated) {
-                authContainer.classList.add('hidden');
-                infoContainer.classList.remove('hidden');
-                
-                const snapshot = window.NurCore.getSnapshot();
-                const userName = snapshot?.user?.name || "Seeker";
-                navBadge.innerText = userName.split('@')[0].toUpperCase();
-                
-                document.getElementById('prof-name').innerText = userName;
-                document.getElementById('prof-email').innerText = snapshot?.user?.email || "sync@nur.com";
-            } else {
-                authContainer.classList.remove('hidden');
-                infoContainer.classList.add('hidden');
-                navBadge.innerText = "PROFILE";
-            }
-        }
+            if (!email || !password) return alert("Credentials cannot be empty.");
 
-        // Authentic Cloud Authentication Broker Controller Actions
-        async function handleAuthAction() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-pass').value;
-            const fullName = document.getElementById('auth-name').value || "Faith Seeker";
-
-            if (!email || !password) {
-                alert("Input fields cannot remain empty.");
-                return;
-            }
-
-            document.getElementById('auth-submit-btn').innerText = "Processing Sync...";
-
-            if (currentAuthMode === 'login') {
+            if (gatewayMode === 'login') {
                 const { data, error } = await window.NurCore.triggerLogin(email, password);
-                if (error) {
-                    alert(`Sync Denied: ${error.message}`);
-                    document.getElementById('auth-submit-btn').innerText = "Access Workspace";
-                } else {
-                    updateAuthVisualState(true);
-                    renderStateToDashboard(window.NurCore.getSnapshot());
-                }
+                if (error) return alert(`Access Denied: ${error.message}`);
+                localStorage.setItem('nur_authenticated_user', data.user.email);
+                unlockAppInterface(data.user.email);
             } else {
-                const { data, error } = await window.NurCore.triggerSignUp(email, password, fullName);
-                if (error) {
-                    alert(`Registration Failed: ${error.message}`);
-                    document.getElementById('auth-submit-btn').innerText = "Register Fresh Node";
-                } else {
-                    alert("Account verification request deployed! Check email streams.");
-                    toggleAuthMode();
-                }
+                const { error } = await window.NurCore.triggerSignUp(email, password, fullName);
+                if (error) return alert(`Failed: ${error.message}`);
+                alert("Verification stream deployed! Check your email inbox.");
+                switchGatewayMode();
             }
         }
 
-        function logoutSession() {
+        function bypassAuthAsGuest() {
+            localStorage.setItem('nur_authenticated_user', "Guest User");
+            unlockAppInterface("Guest User");
+        }
+
+        function unlockAppInterface(identityBadge) {
+            document.documentElement.classList.add('session-active');
+            const truncated = identityBadge.split('@')[0].toUpperCase();
+            
+            document.getElementById('nav-user-badge').innerText = truncated;
+            document.getElementById('prof-display-name').innerText = identityBadge.split('@')[0];
+            document.getElementById('prof-display-email').innerText = identityBadge;
+            
+            const mainApp = document.getElementById('nur-main-application');
+            mainApp.classList.remove('hidden');
+            setTimeout(() => {
+                mainApp.style.opacity = '1';
+                window.NurCore.unlockAudio();
+                initNotificationEngine();
+                fetchCoordinatesContext();
+            }, 100);
+
+            renderStateToDashboard(window.NurCore.getSnapshot());
+        }
+
+        function terminateSession() {
+            localStorage.removeItem('nur_authenticated_user');
+            document.documentElement.classList.remove('session-active');
             window.NurCore.triggerLogout();
-            updateAuthVisualState(false);
             window.location.reload();
         }
 
-        // Main Core Data Pipeline Render Bridge Mapping
         function renderStateToDashboard(state) {
             if (!state) return;
-
-            if(state.readingHistory) {
-                document.getElementById('dash-quran-ayahs').innerHTML = `${state.readingHistory.totalAyahsRead || 0} <span class="text-xs text-slate-400 font-medium">Ayahs</span>`;
-                const surahStr = state.readingHistory.lastSurahName ? `Last Read surah: ${state.readingHistory.lastSurahName}` : 'Last Read surah: None Logged';
-                document.getElementById('dash-quran-surah').innerText = surahStr;
-                document.getElementById('quick-resume-display-str').innerText = surahStr;
+            if (state.readingHistory) {
+                document.getElementById('db-quran-ayahs').innerHTML = `${state.readingHistory.totalAyahsRead || 0} <span class="text-slate-500 font-medium">Ayahs</span>`;
+                const lastSurahString = state.readingHistory.lastSurahName ? `Resume: ${state.readingHistory.lastSurahName}` : 'No active bookmark logged';
+                document.getElementById('db-last-surah').innerText = lastSurahString;
+                document.getElementById('quick-resume-text').innerText = lastSurahString;
             }
-
-            if(state.hadithState) {
-                document.getElementById('dash-hadith-count').innerHTML = `${state.hadithState.totalHadithRead || 0} <span class="text-xs text-slate-400 font-medium">Read</span>`;
-                document.getElementById('dash-hadith-book').innerText = state.hadithState.lastBookName ? `Book Stream: ${state.hadithState.lastBookName}` : 'Book Stream: None Logged';
+            if (state.hadithState) {
+                document.getElementById('db-hadith-count').innerHTML = `${state.hadithState.totalHadithRead || 0} <span class="text-slate-500 font-medium">Read</span>`;
+                document.getElementById('db-last-hadith').innerText = state.hadithState.lastBookName ? `Book: ${state.hadithState.lastBookName}` : 'No logged history';
             }
-
-            if(state.tasbeehAnalytics) {
-                document.getElementById('dash-tasbeeh-total').innerText = state.tasbeehAnalytics.totalCounts || 0;
-                document.getElementById('dash-tasbeeh-goals').innerText = `${state.tasbeehAnalytics.dailyGoalsCompleted || 0} Goals`;
+            if (state.tasbeehAnalytics) {
+                document.getElementById('db-tasbeeh-total').innerText = state.tasbeehAnalytics.totalCounts || 0;
+                document.getElementById('db-tasbeeh-goals').innerText = `${state.tasbeehAnalytics.dailyGoalsCompleted || 0} Goals`;
             }
+            if (state.appUsage) document.getElementById('db-time-spent').innerText = state.appUsage.totalTimeSpent || 0;
+            if (state.streakCounter) document.getElementById('prof-streak-val').innerText = `${state.streakCounter.currentStreak || 1} Day(s)`;
 
-            if(state.appUsage) {
-                document.getElementById('prof-time').innerText = state.appUsage.totalTimeSpent || 0;
-            }
-
-            if(state.streakCounter) {
-                const streak = state.streakCounter.currentStreak || 1;
-                document.getElementById('prof-streak').innerText = `${streak} ${streak > 1 ? 'Active Days' : 'Active Day'}`;
-            }
-
-            // Sync Today's structural prayer tracking points mapped visually
-            const todayStr = new Date().toDateString();
-            const todayPrayers = state.prayerHistory ? state.prayerHistory[todayStr] : null;
-            let counter = 0;
-            const sequence = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-
-            sequence.forEach(p => {
-                const dot = document.querySelector(`[data-p="${p}"]`);
-                if(dot) {
+            const todayPrayers = state.prayerHistory ? state.prayerHistory[new Date().toDateString()] : null;
+            let done = 0;
+            ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].forEach(p => {
+                const dot = document.querySelector(`[data-prayer="${p}"]`);
+                if (dot) {
                     if (todayPrayers && todayPrayers[p]) {
-                        dot.className = "w-2 h-2 rounded-full bg-blue-500 shadow-sm transition-colors";
-                        counter++;
+                        dot.className = "w-2 h-2 rounded-full bg-blue-500 shadow-md";
+                        done++;
                     } else {
-                        dot.className = "w-2 h-2 rounded-full bg-slate-200 transition-colors";
+                        dot.className = "w-2 h-2 rounded-full bg-white/10";
                     }
                 }
             });
-            document.getElementById('dash-prayer-count').innerText = `${counter} / 5 Done`;
+            document.getElementById('db-prayers-count').innerText = `${done} / 5 Completed`;
         }
 
-        // Clock Binding Loops
+        // Realtime Clock Loop Engine
         setInterval(() => {
-            const clock = document.getElementById('clock');
-            if(clock) clock.innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
-            if(globalTimings) executeLivePrayerTimerEngine();
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
+            calculateRealtimePrayerCountdowns();
         }, 1000);
 
-        // Core App Usage Tracker Incrementer Loops
-        setInterval(() => {
-            const snapshot = window.NurCore.getSnapshot();
-            if(snapshot && snapshot.user && snapshot.user.authenticated) {
-                window.NurCore.trackTime(1);
-            }
-        }, 60000);
+        function triggerDynamicQuoteGreeter() {
+            const hour = new Date().getHours();
+            let greeting = "Blessed Morning";
+            if(hour >= 12 && hour < 17) greeting = "Blessed Afternoon";
+            else if(hour >= 17 && hour < 21) greeting = "Blessed Evening";
+            else greeting = "Peaceful Night Hour";
+            document.getElementById('live-greeting').innerText = `${greeting} | Mapped Context`;
+        }
 
-        async function fetchLiveLocationData() {
+        function fetchCoordinatesContext() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (pos) => {
                     try {
                         const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&localityLanguage=en`);
                         const data = await res.json();
-                        document.getElementById('location').innerText = `${data.city || data.locality || 'Active Studio'}, ${data.countryCode}`;
+                        document.getElementById('location').innerText = `${data.city || data.locality || 'Active Node'}, ${data.countryCode}`;
                     } catch (e) { document.getElementById('location').innerText = "Wan Bhachran, PK"; }
-                    setupLivePrayerAlarms(pos.coords.latitude, pos.coords.longitude);
+                    fetchPrayerTimesAPI(pos.coords.latitude, pos.coords.longitude);
                 }, () => {
                     document.getElementById('location').innerText = "Wan Bhachran, PK";
-                    setupLivePrayerAlarms(32.6114, 71.3917);
+                    fetchPrayerTimesAPI(32.6114, 71.3917);
                 });
             }
         }
 
-        async function setupLivePrayerAlarms(lat, lng) {
+        async function fetchPrayerTimesAPI(lat, lng) {
             try {
                 const res = await fetch(`https://api.aladhan.com/v1/timings/${Math.floor(Date.now() / 1000)}?latitude=${lat}&longitude=${lng}&method=4`);
-                const json = await res.json();
-                if (json && json.data && json.data.timings) {
-                    const timings = json.data.timings;
-                    globalTimings = timings;
+                const data = await res.json();
+                if (data && data.data) {
+                    internalPrayerTimings = data.data.timings;
+                    document.getElementById('dashboard-hijri').innerText = `${data.data.date.hijri.day} ${data.data.date.hijri.month.en} ${data.data.date.hijri.year} AH`;
                     
-                    // Inject Textual Timings to Table Data
-                    const sequence = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-                    sequence.forEach(name => {
-                        const el = document.getElementById(`pt-time-${name}`);
-                        if(el) el.innerText = timings[name];
+                    ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].forEach(p => {
+                        document.getElementById(`time-${p}`).innerText = internalPrayerTimings[p];
                     });
-
-                    // Setup Hijri Data Layout Context Text
-                    if(json.data.date && json.data.date.hijri) {
-                        const h = json.data.date.hijri;
-                        document.getElementById('hijri-nav-display').innerText = `${h.day} ${h.month.en} ${h.year} AH`;
-                    }
-
-                    window.NurCore.initializeAlarms({ Fajr: timings.Fajr, Dhuhr: timings.Dhuhr, Asr: timings.Asr, Maghrib: timings.Maghrib, Isha: timings.Isha });
-
-                    window.addEventListener('nurAdhanTrigger', async (e) => {
-                        const prayer = e.detail.name;
-                        const reg = await navigator.serviceWorker.ready;
-                        reg.showNotification(`🕋 Adhan Alert: ${prayer}`, {
-                            body: `Hayya 'alas-Salah! Time for ${prayer} has begun.`,
-                            icon: './logo.png',
-                            vibrate: [400, 200, 400],
-                            tag: `prayer-${prayer}`
-                        });
+                    
+                    window.NurCore.initializeAlarms({
+                        Fajr: internalPrayerTimings.Fajr,
+                        Dhuhr: internalPrayerTimings.Dhuhr,
+                        Asr: internalPrayerTimings.Asr,
+                        Maghrib: internalPrayerTimings.Maghrib,
+                        Isha: internalPrayerTimings.Isha
                     });
                 }
-            } catch (err) { console.error("Timings Synchronization Error:", err); }
+            } catch (err) { console.error("Timings extraction failure stream:", err); }
         }
 
-        function executeLivePrayerTimerEngine() {
-            if(!globalTimings) return;
+        function calculateRealtimePrayerCountdowns() {
+            if (!internalPrayerTimings.Fajr) return;
+
             const now = new Date();
-            const prayerSequence = [
-                { name: 'Fajr', time: globalTimings.Fajr },
-                { name: 'Dhuhr', time: globalTimings.Dhuhr },
-                { name: 'Asr', time: globalTimings.Asr },
-                { name: 'Maghrib', time: globalTimings.Maghrib },
-                { name: 'Isha', time: globalTimings.Isha }
+            const prayerOrder = [
+                { name: 'Fajr', time: internalPrayerTimings.Fajr },
+                { name: 'Dhuhr', time: internalPrayerTimings.Dhuhr },
+                { name: 'Asr', time: internalPrayerTimings.Asr },
+                { name: 'Maghrib', time: internalPrayerTimings.Maghrib },
+                { name: 'Isha', time: internalPrayerTimings.Isha }
             ];
 
-            let currentPrayer = 'Isha';
-            let nextPrayerObj = prayerSequence[0];
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-            // Reset background active states cards highlighting
-            prayerSequence.forEach(p => {
-                const card = document.getElementById(`pt-card-${p.name}`);
-                if(card) card.className = "bg-slate-50 border border-slate-200/60 p-5 rounded-2xl text-center shadow-sm transition";
+            let parsedTimes = prayerOrder.map(p => {
+                const [h, m] = p.time.split(':');
+                const d = new Date();
+                d.setHours(parseInt(h), parseInt(m), 0, 0);
+                return { name: p.name, timestamp: d };
             });
 
-            for (let i = 0; i < prayerSequence.length; i++) {
-                const [h, m] = prayerSequence[i].time.split(':').map(Number);
-                const prayerMinutes = h * 60 + m;
-                if (currentMinutes >= prayerMinutes) {
-                    currentPrayer = prayerSequence[i].name;
-                    nextPrayerObj = prayerSequence[(i + 1) % prayerSequence.length];
+            let current = parsedTimes[parsedTimes.length - 1].name;
+            let nextIndex = 0;
+
+            for (let i = 0; i < parsedTimes.length; i++) {
+                if (now > parsedTimes[i].timestamp) {
+                    current = parsedTimes[i].name;
+                    nextIndex = (i + 1) % parsedTimes.length;
                 }
             }
 
-            document.getElementById('live-current-prayer').innerText = currentPrayer.toUpperCase();
-            const activeCard = document.getElementById(`pt-card-${currentPrayer}`);
-            if(activeCard) activeCard.className = "bg-emerald-50 border-2 border-emerald-400 p-5 rounded-2xl text-center shadow-md transition scale-[1.02]";
+            let nextPrayer = parsedTimes[nextIndex];
+            let diff = nextPrayer.timestamp - now;
+            if (diff < 0) {
+                nextPrayer.timestamp.setDate(nextPrayer.timestamp.getDate() + 1);
+                diff = nextPrayer.timestamp - now;
+            }
 
-            // Countdown Logic calculation
-            const [nh, nm] = nextPrayerObj.time.split(':').map(Number);
-            let targetMinutes = nh * 60 + nm;
-            if (targetMinutes <= currentMinutes) targetMinutes += 24 * 60; // Next Day offset calculation
+            document.getElementById('current-prayer-display').innerText = current.toUpperCase();
+            document.getElementById('next-prayer-name-display').innerText = `UNTIL ${nextPrayer.name.toUpperCase()}`;
+            
+            // Render active card styling state
+            prayerOrder.forEach(p => {
+                const card = document.querySelector(`[data-p-card="${p.name}"]`);
+                if(card) {
+                    card.className = (p.name === current) 
+                        ? "premium-card p-5 rounded-2xl text-center border border-emerald-500/30 bg-emerald-500/[0.02]" 
+                        : "premium-card p-5 rounded-2xl text-center";
+                }
+            });
 
-            const diffSeconds = (targetMinutes - currentMinutes) * 60 - now.getSeconds();
-            const hrs = Math.floor(diffSeconds / 3600).toString().padStart(2, '0');
-            const mins = Math.floor((diffSeconds % 3600) / 60).toString().padStart(2, '0');
-            const secs = (diffSeconds % 60).toString().padStart(2, '0');
+            // Math transformations for exact countdown string layout parsing
+            const hrs = Math.floor(diff / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+            document.getElementById('countdown-display').innerText = `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
 
-            document.getElementById('live-next-prayer-countdown').innerText = `${hrs}:${mins}:${secs}`;
+            // Calculate progress bar percentages mapping downstream
+            const passed = nextIndex === 0 ? 5 : nextIndex;
+            const percentage = (passed / 5) * 100;
+            document.getElementById('prayer-progress-percent').innerText = `${percentage}%`;
+            document.getElementById('prayer-progress-bar').style.width = `${percentage}%`;
         }
 
-        // Islamic 360 Stream Feed Generator (Ayat & Hadith Streams with Urdu Translation Fonts)
-        async function fetchDailyAyatAndHadithStreams() {
+        async function fetchStaticAyahHadithFeeds() {
             try {
-                // Fetch Static/Random Ayat dynamically with translation strings downstream
-                const randomAyah = Math.floor(Math.random() * 200) + 1; // Bound within managed scale
-                const resAr = await fetch(`https://api.alquran.cloud/v1/ayah/${randomAyah}`);
-                const dataAr = await resAr.json();
-                
-                const resUr = await fetch(`https://api.alquran.cloud/v1/ayah/${randomAyah}/ur.khan`);
-                const dataUr = await resUr.json();
+                // Fetch dynamic ayah transmission
+                const randAyah = Math.floor(Math.random() * 6236) + 1;
+                const resAr = await fetch(`https://api.alquran.cloud/v1/ayah/${randAyah}/ar.theme`);
+                const resEn = await fetch(`https://api.alquran.cloud/v1/ayah/${randAyah}/en.asarwat`);
+                const resUr = await fetch(`https://api.alquran.cloud/v1/ayah/${randAyah}/ur.khan`);
+                const dAr = await resAr.json();
+                const dEn = await resEn.json();
+                const dUr = await resUr.json();
 
-                if(dataAr?.data && dataUr?.data) {
-                    document.getElementById('live-card-ayat-ar').innerText = dataAr.data.text;
-                    document.getElementById('live-card-ayat-ur').innerText = dataUr.data.text;
-                    document.getElementById('live-card-ayat-ref').innerText = `${dataAr.data.surah.name} : ${dataAr.data.numberInSurah}`;
+                if(dAr.data && dEn.data && dUr.data) {
+                    document.getElementById('live-ayah-arabic').innerText = dAr.data.text;
+                    document.getElementById('live-ayah-english').innerText = dEn.data.text;
+                    document.getElementById('live-ayah-urdu').innerText = dUr.data.text;
+                    document.getElementById('live-ayah-ref').innerText = `${dAr.data.surah.englishName} [${dAr.data.numberInSurah}]`;
                 }
+            } catch(e) { console.error("Buffer fault parsing live ayah stream:", e); }
 
-                // Inject Hardcoded Mock Authentic Hadith Strings matching requirements
-                document.getElementById('live-card-hadith-ar').innerText = "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِکُلِّ امْرِئٍ مَا نَوَى۔";
-                document.getElementById('live-card-hadith-ur').innerText = "اعمال کا دارومدار نیتوں پر ہے، اور ہر انسان کے لیے وہی ہے جس کی اس نے نیت کی۔";
-                document.getElementById('live-card-hadith-ref').innerText = "Sahih Al-Bukhari : 1";
-
-            } catch(e) { console.error("Stream Fetch Error Context Failure:", e); }
+            // Reliable static layout fallback array matrix injection for Hadith of the Day
+            const hadithStack = [
+                { ar: "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ", en: "Actions are judged by intentions.", ur: "اعمال کا دارومدار نیتوں پر ہے۔", ref: "Sahih al-Bukhari 1" },
+                { ar: "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ", en: "The best among you are those who learn the Quran and teach it.", ur: "تم میں سے بہترین شخص وہ ہے جو قرآن سیکھے اور سکھائے۔", ref: "Sahih al-Bukhari 5027" }
+            ];
+            const selection = hadithStack[Math.floor(Math.random() * hadithStack.length)];
+            document.getElementById('live-hadith-arabic').innerText = selection.ar;
+            document.getElementById('live-hadith-english').innerText = selection.en;
+            document.getElementById('live-hadith-urdu').innerText = selection.ur;
+            document.getElementById('live-hadith-ref').innerText = selection.ref;
         }
 
-        async function initRealtimeNotificationSystem() {
-            if (!('Notification' in window)) return;
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                const today = new Date().toDateString();
-                if (localStorage.getItem('nur_daily_notif') === today) return;
-                
-                const reg = await navigator.serviceWorker.ready;
-                reg.showNotification("✨ Ayat & Hadith Stream Online", {
-                    body: "Welcome back! Daily Islamic streams and prayer alarms are synced with Nur Core.",
-                    icon: './logo.png',
-                    tag: 'daily-stream'
-                });
-                localStorage.setItem('nur_daily_notif', today);
+        function copyContent(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => alert("Content copied to secure clipboard stream."));
+        }
+
+        function shareText(title, elementId) {
+            const text = document.getElementById(elementId).innerText;
+            if (navigator.share) {
+                navigator.share({ title: title, text: text }).catch(console.error);
+            } else {
+                alert("Web Share API payload not engaged on this node dashboard browser layout.");
             }
+        }
+
+        async function initNotificationEngine() {
+            if ('Notification' in window) await Notification.requestPermission();
         }
 
         function toggleSidebar(open) {
             const side = document.getElementById('sidebar');
-            if(open) {
+            if (open) {
                 side.classList.remove('hidden');
                 setTimeout(() => side.classList.add('opacity-100'), 10);
             } else {
@@ -746,14 +761,6 @@
                 setTimeout(() => side.classList.add('hidden'), 300);
             }
         }
-
-        window.addEventListener('scroll', () => {
-            document.querySelectorAll(".reveal, .reveal-wipe").forEach((el) => {
-                if (el.getBoundingClientRect().top < window.innerHeight - 80) {
-                    el.classList.add("active");
-                }
-            });
-        });
 
         function toggleMenu() {
             document.getElementById('menu-container').classList.toggle('menu-open');
