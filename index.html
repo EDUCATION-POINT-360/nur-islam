@@ -33,10 +33,6 @@
         .reveal { opacity: 0; transform: translateY(50px); transition: all 1s cubic-bezier(0.2, 1, 0.3, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
         .glass-card-light { background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); }
-        .timeline-path-light { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: rgba(226, 232, 240, 0.5); transform: translateX(-50%); overflow: hidden; }
-        #timeline-progress-light { position: absolute; top: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to bottom, #10b981, #06b6d4, #f59e0b); transition: height 0.3s ease-out; }
-        .timeline-node-light { position: absolute; left: 50%; width: 20px; height: 20px; background: white; border: 4px solid #e2e8f0; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; transition: all 0.6s ease; }
-        .timeline-node-light.active { border-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.8); }
         .reveal-wipe { opacity: 0; clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%); transition: all 1.2s cubic-bezier(0.77, 0, 0.175, 1); }
         .reveal-wipe.active { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); }
         .menu-open #menu-items { opacity: 1 !important; transform: translateY(0) !important; pointer-events: auto !important; }
@@ -107,7 +103,7 @@
                 <button onclick="terminateSession()" class="text-xs font-black text-red-500 uppercase tracking-wider hover:underline"><i class="fa-solid fa-power-off mr-1"></i> Exit</button>
                 <button onclick="toggleSidebar(true)" class="lg:hidden text-xl"><i class="fa-solid fa-bars-staggered"></i></button>
             </div>
-        </nav>nav>
+        </nav>
 
         <div id="sidebar" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[110] hidden opacity-0 transition-opacity">
             <div class="w-80 h-full bg-white ml-auto p-12 flex flex-col shadow-2xl">
@@ -223,11 +219,10 @@
                 </div>
             </section>
             
-            <div class="timeline-path-light"><div id="timeline-progress-light"></div></div>
+            <!-- Removed the Timeline path and line elements from here -->
 
             <div class="max-w-6xl mx-auto px-6 space-y-48 lg:space-y-80 relative">
                 <div class="reveal-wipe flex flex-col lg:flex-row items-center gap-16 lg:gap-32 relative">
-                    <div class="timeline-node-light lg:block hidden top-1/2" id="node-1"></div>
                     <div class="w-full lg:w-1/2 flex justify-center">
                         <div class="relative group">
                             <div class="absolute -inset-4 bg-emerald-500 rounded-[5rem] opacity-10 blur-2xl transition duration-700"></div>
@@ -251,7 +246,6 @@
                 </div>
 
                 <div class="reveal-wipe flex flex-col-reverse lg:flex-row items-center gap-16 lg:gap-32 relative">
-                    <div class="timeline-node-light lg:block hidden top-1/2" id="node-2"></div>
                     <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
                         <div class="inline-block px-4 py-1.5 bg-cyan-50 text-cyan-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">The Platform</div>
                         <h3 class="serif text-5xl lg:text-7xl font-black italic text-slate-900 leading-none">The NUR <br>Portal</h3>
@@ -386,7 +380,6 @@
                 fetchLiveLocationData();
             }, 100);
 
-            // Fetch state mapping snapshot immediately after entry layout transition
             renderStateToDashboard(window.NurCore.getSnapshot());
         }
 
@@ -466,7 +459,7 @@
                     setupLivePrayerAlarms(pos.coords.latitude, pos.coords.longitude);
                 }, () => {
                     document.getElementById('location').innerText = "Wan Bhachran, PK";
-                    setupLivePrayerAlarms(32.6114, 71.3917); // Fallback Default Coordinates
+                    setupLivePrayerAlarms(32.6114, 71.3917);
                 });
             }
         }
@@ -504,13 +497,10 @@
                 const data = await res.json();
                 if (data && data.data && data.data.timings) {
                     const t = data.data.timings;
-                    // Format time signatures to match the required alarm array checks (HH:MM)
                     const alarmsTimetable = { Fajr: t.Fajr, Dhuhr: t.Dhuhr, Asr: t.Asr, Maghrib: t.Maghrib, Isha: t.Isha };
                     
-                    // Boot up core alarms background engine framework directly
                     window.NurCore.initializeAlarms(alarmsTimetable);
 
-                    // Connect global system alerts directly to service worker channels
                     window.addEventListener('nurAdhanTrigger', async (e) => {
                         const prayer = e.detail.name;
                         const reg = await navigator.serviceWorker.ready;
@@ -537,17 +527,9 @@
         }
 
         window.addEventListener('scroll', () => {
-            const winScroll = window.scrollY || document.documentElement.scrollTop;
-            const height = document.documentElement.scrollHeight - window.innerHeight;
-            const scrolled = (winScroll / height) * 100;
-            const progLight = document.getElementById("timeline-progress-light");
-            if(progLight) progLight.style.height = scrolled + "%";
-
-            document.querySelectorAll(".reveal, .reveal-wipe").forEach((el, index) => {
+            document.querySelectorAll(".reveal, .reveal-wipe").forEach((el) => {
                 if (el.getBoundingClientRect().top < window.innerHeight - 100) {
                     el.classList.add("active");
-                    const nodes = document.querySelectorAll(".timeline-node-light");
-                    if(nodes[index]) nodes[index].classList.add("active");
                 }
             });
         });
